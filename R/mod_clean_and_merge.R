@@ -16,8 +16,8 @@ mod_clean_and_merge_ui <- function(id){
     fluidRow(
       
       fileInput(ns("endoscopyFile"), "Load data file"),
-      tags$div(id = ns("placeholder1"))
-      ),
+      uiOutput(ns("textInputsUI"))
+    ),
     
     fluidRow(
       
@@ -52,14 +52,17 @@ mod_clean_and_merge_server <- function(input, output, session){
   
   textbox_number <- reactiveValues()
   
-  observe({
+  output$textInputsUI <- renderUI({
     
-    possible_headings <- unlist(strsplit(as.character(endoscopyData()[, 1]), "\n"))
+    possible_headings <- unlist(strsplit(as.character(endoscopyData()[1, 1]), "\n"))
     
-    insertUI(selector = paste0("#", ns("placeholder1")), where = "afterEnd", 
-             ui = textInput(session$ns("testID"), "Insert text")
+    possible_vars <- gsub('\\s+|[[:punct:]]+', '', possible_headings)
+    
+    do.call(flowLayout,
+            lapply(1 : length(possible_headings), function(x){
+              textInput(session$ns(possible_vars[x]), "Insert text",
+                        value = possible_headings[x])
+            })
     )
   })
-  
 }
-
