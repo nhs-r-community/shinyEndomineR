@@ -14,20 +14,20 @@ app_ui <- function(request) {
       dashboardHeader(title = "Shiny Endominer"),
       dashboardSidebar(
         sidebarMenu(
-          menuItem("Load data", tabName = "dashboard", icon = icon("dashboard")),
-          menuItem("TBC", tabName = "tbc", icon = icon("th"))
+          menuItem("Endoscopy data", tabName = "endoData", icon = icon("dashboard")),
+          menuItem("Pathology data", tabName = "pathData", icon = icon("th"))
         )
       ),
       dashboardBody(
         tabItems(
           # First tab content
-          tabItem(tabName = "dashboard",
+          tabItem(tabName = "endoData",
                   mod_clean_and_merge_ui("clean_and_merge_ui_1")
           ),
           
           # Second tab content
-          tabItem(tabName = "widgets",
-                  h2("Widgets tab content")
+          tabItem(tabName = "pathData",
+                  mod_clean_and_merge_ui("clean_and_merge_ui_2")
           )
         )
       )
