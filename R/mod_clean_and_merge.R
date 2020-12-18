@@ -11,18 +11,19 @@ mod_clean_and_merge_ui <- function(id){
   ns <- NS(id)
   tagList(
     
-    # dataset 1
-    
-    fluidRow(
+    fluidPage(
+      fluidRow(
+        
+        fileInput(ns("selectFile"), "Load data file"),
+        fileInput(ns("loadHeaders"), "Load headers from a previous run"),
+        downloadButton(ns("saveHeaders"), "Save headers"),
+        uiOutput(ns("textInputsUI"))
+      ),
       
-      fileInput(ns("endoscopyFile"), "Load data file"),
-      uiOutput(ns("textInputsUI"))
-    ),
-    
-    fluidRow(
-      
-      # textOutput(ns("testInputs")),
-      DT::dataTableOutput(ns("endotable"))
+      fluidRow(
+        
+        DT::dataTableOutput(ns("endotable"))
+      )
     )
   )
 }
@@ -30,73 +31,87 @@ mod_clean_and_merge_ui <- function(id){
 #' clean_and_merge Server Function
 #'
 #' @noRd 
-mod_clean_and_merge_server <- function(input, output, session){
-  ns <- session$ns
-  
-  # load the data
-  
-  endoscopyData <- reactive({
+mod_clean_and_merge_server <- function(id, header_filename){
+  moduleServer( id, function(input, output, session){
+    ns <- session$ns
     
-    req(input$endoscopyFile)
+    # load the data
     
-    load_endoscopy(input$endoscopyFile$datapath)
-  })
-  
-  # show the raw data
-  
-  output$endotable <- DT::renderDT({
-    
-    if(isTruthy(endoData())){
+    returnData <- reactive({
       
-      endoData()
-    } else {
+      req(input$selectFile)
       
-      endoscopyData()
-    }
-  })
-  
-  # produce UI elements for each heading
-  
-  output$textInputsUI <- renderUI({
+      load_endoscopy(input$selectFile$datapath)
+    })
     
-    possible_vars <- unlist(strsplit(as.character(endoscopyData()[1, 1]), "\n"))
+    # show the raw data
     
-    possible_vars <- substr(possible_vars, 1, 30)
+    output$endotable <- DT::renderDT({
+      
+      if(isTruthy(endoData())){
+        
+        endoData()
+      } else {
+        
+        returnData()
+      }
+    })
     
-    do.call(flowLayout,
-            lapply(1 : length(possible_vars), function(x){
-              textInput(session$ns(paste0("heading_id_", x)), "Insert text",
-                        value = possible_vars[x])
-            })
-    )
-  })
-  
-  output$testInputs <- renderText({
+    # produce UI elements for each heading
     
-    list_of_headings <- sapply(
-      grep(pattern = "heading_id_", 
-           x = stringr::str_sort(names(input), numeric = TRUE), value = TRUE), 
-      function(x) input[[x]])
+    output$textInputsUI <- renderUI({
+      
+      possible_vars <- unlist(strsplit(as.character(returnData()[1, 1]), "\n"))
+      
+      possible_vars <- substr(possible_vars, 1, 30)
+      
+      do.call(flowLayout,
+              lapply(1 : length(possible_vars), function(x){
+                textInput(session$ns(paste0("heading_id_", x)), "Insert text",
+                          value = possible_vars[x])
+              })
+      )
+    })
     
-    list_of_headings
-  })
-  
-  endoData <- reactive({
+    # define a reactive for the headers
     
-    mywordsOGD <- sapply(
-      grep(pattern = "heading_id_", 
-           x = stringr::str_sort(names(input), numeric = TRUE), value = TRUE), 
-      function(x) input[[x]])
+    spreadsheetHeaders <- reactive({
+      
+      if(isTruthy(input$loadHeaders$datapath)){
+        
+        return(readRDS(input$loadHeaders$datapath))
+      }
+      
+      mywordsOGD <- sapply(
+        grep(pattern = "heading_id_", 
+             x = stringr::str_sort(names(input), numeric = TRUE), value = TRUE), 
+        function(x) input[[x]])
+      
+      return(stringi::stri_remove_empty(trimws(mywordsOGD)))
+    })
     
-    mywordsOGD <- stringi::stri_remove_empty(trimws(mywordsOGD))
-    
-    endo_object <- withProgress(message = 'Splitting the data...
+    endoData <- reactive({
+      
+      endo_object <- withProgress(message = 'Splitting the data...
         spell checking... 
         term mapping against lexicons...
         cleaning columns...
         formatting columns...',
+        
+        EndoMineR::textPrep(returnData()[, 1], spreadsheetHeaders())
+      )
+    })
+    
+    # handle saving the headers
+    
+    output$saveHeaders <- downloadHandler(
       
-      EndoMineR::textPrep(endoscopyData()[, 1], mywordsOGD)
+      filename = header_filename,
+      
+      content = function(file){
+        
+        saveRDS(spreadsheetHeaders(), file = file)
+      }
     )
   })
 }

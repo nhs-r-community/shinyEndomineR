@@ -4,7 +4,7 @@
 #' 
 #' @param filepath filepath
 #' @return dataframe
-load_endoscopy <- function(filepath){
+load_data <- function(filepath){
   
   data_file <- readxl::read_excel(filepath)
   return(data.frame(EndoMineR::EndoPaste(data_file)[1], stringsAsFactors = FALSE))

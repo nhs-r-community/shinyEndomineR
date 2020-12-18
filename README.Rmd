@@ -18,37 +18,6 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of shinyEndomineR is to ...
+Endoscopy performance needs to be measurable. EndoMineR-Shiny is the interface for the [package EndoMineR](https://github.com/sebastiz/EndoMineR_Shiny). The package aims to extract information from endoscopic and associated pathology reports. The extracted information is used to automatically derive performance metrics for endoscopists, follow-up timings for patients and a number of other graphical outcomes. The interface hopes to make the whole process of automated metrics user friendly and graphical.
 
-## Installation
-
-You can install the released version of shinyEndomineR from [CRAN](https://CRAN.R-project.org) with:
-
-``` r
-install.packages("shinyEndomineR")
-```
-
-## Example
-
-This is a basic example which shows you how to solve a common problem:
-
-```{r example}
-library(shinyEndomineR)
-## basic example code
-```
-
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
-
-```{r cars}
-summary(cars)
-```
-
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date.
-
-You can also embed plots, for example:
-
-```{r pressure, echo = FALSE}
-plot(pressure)
-```
-
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub!
+This application is in the very early stages of development.
