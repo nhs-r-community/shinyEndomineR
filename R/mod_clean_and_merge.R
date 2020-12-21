@@ -67,7 +67,7 @@ mod_clean_and_merge_server <- function(id, header_filename){
       
       do.call(flowLayout,
               lapply(1 : length(possible_vars), function(x){
-                textInput(session$ns(paste0("heading_id_", x)), "Insert text",
+                textInput(session$ns(paste0("heading_id_", x)), "Edit delimiter",
                           value = possible_vars[x])
               })
       )
@@ -101,6 +101,8 @@ mod_clean_and_merge_server <- function(id, header_filename){
         EndoMineR::textPrep(returnData()[, 1], spreadsheetHeaders())
       )
     })
+    
+    # endoData <- endoData %>% debounce(6000)
     
     # handle saving the headers
     

@@ -14,8 +14,9 @@ app_ui <- function(request) {
       dashboardHeader(title = "Shiny Endominer"),
       dashboardSidebar(
         sidebarMenu(
-          menuItem("Endoscopy data", tabName = "endoData", icon = icon("dashboard")),
-          menuItem("Pathology data", tabName = "pathData", icon = icon("th"))
+          menuItem("Endoscopy data", tabName = "endoData", icon = icon("user-md")),
+          menuItem("Pathology data", tabName = "pathData", icon = icon("microscope")),
+          menuItem("Merge data", tabName = "mergeData", icon = icon("object-group"))
         )
       ),
       dashboardBody(
@@ -28,7 +29,10 @@ app_ui <- function(request) {
           # Second tab content
           tabItem(tabName = "pathData",
                   mod_clean_and_merge_ui("clean_and_merge_ui_2")
-          )
+          ),
+          
+          tabItem(tabName = "mergeData",
+                  mod_merge_data_ui("merge_data_ui_1"))
         )
       )
     )
