@@ -9,5 +9,4 @@ load_data <- function(filepath){
   data_file <- readxl::read_excel(filepath)
   return(data.frame(EndoMineR::EndoPaste(data_file)[1], stringsAsFactors = FALSE))
   
-  # return(as.character(EndoMineR::EndoPaste(data_file)[[1]]))
 }

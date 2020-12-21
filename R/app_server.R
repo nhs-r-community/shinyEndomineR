@@ -7,7 +7,7 @@
 app_server <- function( input, output, session ) {
   # List the first level callModules here
   
-  mod_clean_and_merge_server("clean_and_merge_ui_1", header_filename = "endo.rda")
+  endo_data <- mod_clean_and_merge_server("clean_and_merge_ui_1", header_filename = "endo.rda")
   
-  mod_clean_and_merge_server("clean_and_merge_ui_2", header_filename = "path.rda")
+  path_data <- mod_clean_and_merge_server("clean_and_merge_ui_2", header_filename = "path.rda")
 }

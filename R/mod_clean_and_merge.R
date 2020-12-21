@@ -41,7 +41,7 @@ mod_clean_and_merge_server <- function(id, header_filename){
       
       req(input$selectFile)
       
-      load_endoscopy(input$selectFile$datapath)
+      load_data(input$selectFile$datapath)
     })
     
     # show the raw data
@@ -112,6 +112,13 @@ mod_clean_and_merge_server <- function(id, header_filename){
         
         saveRDS(spreadsheetHeaders(), file = file)
       }
+    )
+    
+    # return the data
+    
+    reactive(
+      
+      endoData()
     )
   })
 }
