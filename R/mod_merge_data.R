@@ -12,11 +12,13 @@ mod_merge_data_ui <- function(id){
   tagList(
     
     # render controls for both datasets in one renderUI()
-      uiOutput(ns("varSelectors")),
-      actionButton(ns("mergeData"), "Merge data")
+    uiOutput(ns("varSelectors")),
+    actionButton(ns("mergeData"), "Merge data"),
+    
+    # now let's render controls for the names of the merged dataset
   )
 }
-    
+
 #' merge_data Server Functions
 #'
 #' @noRd 
@@ -29,32 +31,33 @@ mod_merge_data_server <- function(id, endo_data, path_data){
       fluidRow(
         # endo controls
         column(6, 
-               selectInput("endoDate", "Endoscopy date", 
+               selectInput(session$ns("endoDate"), "Endoscopy date", 
                            choices = names(endo_data())),
-               selectInput("endoNumber", "Endoscopy hospital number",
+               selectInput(session$ns("endoNumber"), "Endoscopy hospital number",
                            choices = names(endo_data()))
-               ),
+        ),
         # pathology controls
         column(6,
-               selectInput("pathDate", "Pathology date",
+               selectInput(session$ns("pathDate"), "Pathology date",
                            choices = names(path_data())),
-               selectInput("pathNumber", "Pathology hospital number",
+               selectInput(session$ns("pathNumber"), "Pathology hospital number",
                            choices = names(path_data()))
-               )
+        )
       )
     })
     
-    observeEvent("mergeData", {
+    return_merge <- reactive({
       
-      merged_data <- reactiveValues({
-        data = EndoMineR::Endomerge2(endo_data(),
-                                     input$endoData,
-                                     input$endoNumber,
-                                     path_data(),
-                                     input$pathDate,
-                                     input$pathNumber)
-      })
+      return(EndoMineR::Endomerge2(endo_data(),
+                                   input$endoDate,
+                                   input$endoNumber,
+                                   path_data(),
+                                   input$pathDate,
+                                   input$pathNumber))
     })
- 
+    
+    reactive({
+      return_merge()
+    })
   })
 }

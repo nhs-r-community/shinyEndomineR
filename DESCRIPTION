@@ -14,7 +14,8 @@ Imports:
     glue,
     htmltools,
     magrittr,
-    stringr
+    stringr,
+    plotly
 Remotes: 
     sebastiz/EndoMineR
 Encoding: UTF-8

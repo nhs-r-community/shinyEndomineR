@@ -16,7 +16,9 @@ app_ui <- function(request) {
         sidebarMenu(
           menuItem("Endoscopy data", tabName = "endoData", icon = icon("user-md")),
           menuItem("Pathology data", tabName = "pathData", icon = icon("microscope")),
-          menuItem("Merge data", tabName = "mergeData", icon = icon("object-group"))
+          menuItem("Merge data", tabName = "mergeData", icon = icon("object-group")),
+          menuItem("Map terms", tabName = "mapTerms", icon = icon("map")),
+          menuItem("Barrett's", tabName = "barretts", icon = icon("chart-bar"))
         )
       ),
       dashboardBody(
@@ -32,7 +34,16 @@ app_ui <- function(request) {
           ),
           
           tabItem(tabName = "mergeData",
-                  mod_merge_data_ui("merge_data_ui_1"))
+                  mod_merge_data_ui("merge_data_ui_1")
+          ),
+          
+          tabItem(tabName = "mapTerms",
+                  mod_map_terms_ui("map_terms_ui_1")
+          ),
+          
+          tabItem(tabName = "barretts",
+                  mod_barretts_ui("barretts_ui_1")
+          )
         )
       )
     )
@@ -52,7 +63,7 @@ golem_add_external_resources <- function(){
   add_resource_path(
     'www', app_sys('app/www')
   )
- 
+  
   tags$head(
     favicon(),
     bundle_resources(
