@@ -12,8 +12,7 @@ mod_merge_data_ui <- function(id){
   tagList(
     
     # render controls for both datasets in one renderUI()
-    uiOutput(ns("varSelectors")),
-    actionButton(ns("mergeData"), "Merge data"),
+    uiOutput(ns("varSelectors"))
     
     # now let's render controls for the names of the merged dataset
   )
@@ -48,12 +47,30 @@ mod_merge_data_server <- function(id, endo_data, path_data){
     
     return_merge <- reactive({
       
-      return(EndoMineR::Endomerge2(endo_data(),
+      the_data <- EndoMineR::Endomerge2(endo_data(),
                                    input$endoDate,
                                    input$endoNumber,
                                    path_data(),
                                    input$pathDate,
-                                   input$pathNumber))
+                                   input$pathNumber)
+      
+      if(!("Date" %in% colnames(the_data))){
+        colnames(the_data)[colnames(the_data) == input$endoDate] <- "Date"
+      }
+      
+      #To Make sure no date clash issues
+      if("Date.x" %in% colnames(the_data)){
+        colnames(the_data)[colnames(the_data) == "Date.x"] <- "Date"
+      }
+      
+      if(!("HospitalNum" %in% colnames(the_data))){
+        colnames(the_data)[colnames(the_data) == "eHospitalNum"] <- "HospitalNum"
+      }
+      
+      #Remove duplicates here
+      the_data <-  the_data[!duplicated(the_data), ]
+      
+      return(the_data)
     })
     
     reactive({
