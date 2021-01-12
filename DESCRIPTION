@@ -15,7 +15,10 @@ Imports:
     htmltools,
     magrittr,
     stringr,
-    plotly
+    plotly,
+    pkgload,
+    shinydashboard,
+    EndoMineR (>= 2.0.1.9000)
 Remotes: 
     sebastiz/EndoMineR
 Encoding: UTF-8

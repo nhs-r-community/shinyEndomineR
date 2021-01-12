@@ -4,7 +4,6 @@
 # shinyEndomineR
 
 <!-- badges: start -->
-
 <!-- badges: end -->
 
 Endoscopy performance needs to be measurable. EndoMineR-Shiny is the
@@ -17,3 +16,16 @@ a number of other graphical outcomes. The interface hopes to make the
 whole process of automated metrics user friendly and graphical.
 
 This application is in the very early stages of development.
+
+Install and run as follows:
+
+``` r
+# devtools::install_github("CDU-data-science-team/shinyEndomineR")
+
+library(shinyEndomineR)
+
+run_app()
+```
+
+[Link to hosted
+version](https://involve.nottshc.nhs.uk:8443/shiny_endominer/)
