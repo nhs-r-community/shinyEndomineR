@@ -10,8 +10,15 @@
 mod_polyps_ui <- function(id){
   ns <- NS(id)
   tagList(
-    plotly::plotlyOutput(ns("plotPolypEQ")),
-    DT::DTOutput(ns("grs_table"))
+    fluidRow(
+      column(5,
+             plotly::plotlyOutput(ns("plotPolypEQ"))
+      ),
+      column(7,
+             DT::DTOutput(ns("grs_table")),
+             plotly::plotlyOutput(ns("endoscopyUse_EndoscopyUsePolyp"))
+      )
+    )
   )
 }
 
@@ -57,7 +64,7 @@ mod_polyps_server <- function(id, merge_data, map_terms){
       ForGRS
     })
     
-    output$plotPolypEQ <- renderPlotly({
+    output$plotPolypEQ <- plotly::renderPlotly({
       
       MyPolypTable <- tidyr::gather(
         polyp_data(),
@@ -67,16 +74,17 @@ mod_polyps_server <- function(id, merge_data, map_terms){
       
       #Get rid of the overall number figure (=n)
       MyPolypTable <- MyPolypTable %>%
-        filter(!grepl("^n$",DocumentedElement))
+        dplyr::filter(!grepl("^n$", DocumentedElement))
       
       key <- map_terms()$Map_EndoscopistIn
       
-      p <- ggplot(MyPolypTable, aes_string(x = key, 
-                                           y = "percentage", fill = "DocumentedElement")) + 
-        geom_bar(stat = "identity") + theme(axis.text.x = element_text(angle = -90))
+      p <- ggplot2::ggplot(MyPolypTable, ggplot2::aes_string(x = key, 
+                                                             y = "percentage", fill = "DocumentedElement")) + 
+        ggplot2::geom_bar(stat = "identity") + 
+        ggplot2::theme(axis.text.x = ggplot2::element_text(angle = -90))
       
-      ggplotly(p, source = "subset", key = key) %>% 
-        layout(dragmode = "select")
+      plotly::ggplotly(p, source = "subset", key = key) %>% 
+        plotly::layout(dragmode = "select")
     })
     
     output$grs_table <- DT::renderDT({

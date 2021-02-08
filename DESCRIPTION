@@ -18,7 +18,9 @@ Imports:
     plotly,
     pkgload,
     shinydashboard,
-    EndoMineR (>= 2.0.1.9000)
+    EndoMineR (>= 2.0.1.9000),
+    data.table,
+    ggTimeSeries
 Remotes: 
     sebastiz/EndoMineR
 Encoding: UTF-8
