@@ -18,7 +18,8 @@ app_ui <- function(request) {
           menuItem("Pathology data", tabName = "pathData", icon = icon("microscope")),
           menuItem("Merge data", tabName = "mergeData", icon = icon("object-group")),
           menuItem("Map terms", tabName = "mapTerms", icon = icon("map")),
-          menuItem("Barrett's", tabName = "barretts", icon = icon("chart-bar"))
+          menuItem("Barrett's", tabName = "barretts", icon = icon("chart-bar")),
+          menuItem("Polyps", tabName = "polyps", icon = icon("chart-bar"))
         )
       ),
       dashboardBody(
@@ -43,6 +44,9 @@ app_ui <- function(request) {
           
           tabItem(tabName = "barretts",
                   mod_barretts_ui("barretts_ui_1")
+          ),
+          tabItem(tabName = "polyps",
+                  mod_polyps_ui("polyps_ui_1")
           )
         )
       )

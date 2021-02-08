@@ -15,12 +15,16 @@
 
 ## Dependencies ----
 ## Add one line by package you want to add as dependency
-usethis::use_package("stringr")
+usethis::use_package("shinydashboard")
+usethis::use_dev_package("EndoMineR", remote = "sebastiz/EndoMineR")
 
 ## Add modules ----
 ## Create a module infrastructure in R/
 golem::add_module(name = "clean_and_merge") # Name of the module
-golem::add_module( name = "name_of_module2" ) # Name of the module
+golem::add_module( name = "merge_data" ) # Name of the module
+golem::add_module( name = "map_terms" ) # Name of the module
+golem::add_module( name = "barretts" ) # Name of the module
+golem::add_module( name = "polyps" ) # Name of the module
 
 ## Add helper functions ----
 ## Creates ftc_* and utils_*

@@ -16,4 +16,6 @@ app_server <- function( input, output, session ) {
   map_terms <- mod_map_terms_server("map_terms_ui_1", merge_data = merge_data)
   
   mod_barretts_server("barretts_ui_1", merge_data = merge_data, map_terms = map_terms)
+  
+  mod_polyps_server("polyps_ui_1", merge_data = merge_data, map_terms = map_terms)
 }
