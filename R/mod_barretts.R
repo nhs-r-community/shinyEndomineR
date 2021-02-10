@@ -32,23 +32,22 @@ mod_barretts_server <- function(id, merge_data, map_terms){
     
     barretts_data <- reactive({
       
-      barretts_data <- merge_data()[Reduce(`|`, lapply(merge_data(), 
-                                                       grepl, 
-                                                       pattern = "columnar.*?lined.*?\\.|barrett")), ]
+      barretts_data <- merge_data()[Reduce(`|`, 
+                                           lapply(merge_data(), 
+                                                  grepl, 
+                                                  pattern = "columnar.*?lined.*?\\.|barrett")), ]
       
       barretts_data <- EndoMineR::Barretts_PragueScore(barretts_data, 
                                                        map_terms()$Map_FindingsIn, 
                                                        map_terms()$Map_Findings2In)
       
-      barretts_data2 <- EndoMineR::Barretts_PragueScore(barretts_data, 
-                                                        "findings", 
-                                                        NULL)
       barretts_data$mytext <- NULL
       barretts_data$MStage <- as.numeric(barretts_data$MStage)
       barretts_data$CStage <- as.numeric(barretts_data$CStage)
       barretts_data$IMorNoIM <- EndoMineR::Barretts_PathStage(barretts_data, 
                                                               map_terms()$Map_MicroscopicTextIn)
-      # note that the strings in the following line are not names of the merged dataset, they are fixed
+      # note that the strings in the following line are not names of the merged dataset, 
+      # they are fixed
       
       barretts_data$FU_Type <- EndoMineR::Barretts_FUType(barretts_data, 
                                                           "CStage", "MStage", "IMorNoIM")
@@ -73,19 +72,19 @@ mod_barretts_server <- function(id, merge_data, map_terms){
       Hiatus <- merge_data() %>% 
         dplyr::group_by(!! rlang::sym(map_terms()$Map_EndoscopistIn)) %>% 
         dplyr::summarise(Hiatus = (sum(grepl("[Hh]iatus|[Ii]sland", 
-                                      !!rlang::sym(map_terms()$Map_FindingsIn))) / dplyr::n()) * 100)
+                                             !!rlang::sym(map_terms()$Map_FindingsIn))) / dplyr::n()) * 100)
       Island <- merge_data() %>% 
         dplyr::group_by(!! rlang::sym(map_terms()$Map_EndoscopistIn)) %>% 
         dplyr::summarise(Island = (sum(grepl("[Ii]sland", 
-                                      !!rlang::sym(map_terms()$Map_FindingsIn))) / dplyr::n()) * 100)
+                                             !!rlang::sym(map_terms()$Map_FindingsIn))) / dplyr::n()) * 100)
       Pinch <- merge_data() %>% 
         dplyr::group_by(!! rlang::sym(map_terms()$Map_EndoscopistIn)) %>% 
         dplyr::summarise(Pinch = (sum(grepl("[Pp]inch", 
-                                     !!rlang::sym(map_terms()$Map_FindingsIn))) / dplyr::n()) * 100)
+                                            !!rlang::sym(map_terms()$Map_FindingsIn))) / dplyr::n()) * 100)
       Lesion <- merge_data() %>% 
         dplyr::group_by(!! rlang::sym(map_terms()$Map_EndoscopistIn)) %>% 
         dplyr::summarise(Lesion = (sum(grepl("esion|odule|lcer", 
-                                      !!rlang::sym(map_terms()$Map_FindingsIn))) / dplyr::n()) * 100)
+                                             !!rlang::sym(map_terms()$Map_FindingsIn))) / dplyr::n()) * 100)
       
       FinalTable <- dplyr::full_join(Hiatus, Island, by = map_terms()$Map_EndoscopistIn)
       FinalTable <- dplyr::full_join(FinalTable, Pinch, by = map_terms()$Map_EndoscopistIn)
