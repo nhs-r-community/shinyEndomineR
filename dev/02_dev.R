@@ -27,6 +27,8 @@ golem::add_module( name = "merge_data" ) # Name of the module
 golem::add_module( name = "map_terms" ) # Name of the module
 golem::add_module( name = "barretts" ) # Name of the module
 golem::add_module( name = "polyps" ) # Name of the module
+golem::add_module( name = "per_endoscopist" ) # Name of the module
+
 
 ## Add helper functions ----
 ## Creates ftc_* and utils_*

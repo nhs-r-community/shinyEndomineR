@@ -19,7 +19,8 @@ app_ui <- function(request) {
           menuItem("Merge data", tabName = "mergeData", icon = icon("object-group")),
           menuItem("Map terms", tabName = "mapTerms", icon = icon("map")),
           menuItem("Barrett's", tabName = "barretts", icon = icon("chart-bar")),
-          menuItem("Polyps", tabName = "polyps", icon = icon("chart-bar"))
+          menuItem("Polyps", tabName = "polyps", icon = icon("chart-bar")),
+          menuItem("Per endoscopist", tabName = "endoscopist", icon = icon("users"))
         )
       ),
       dashboardBody(
@@ -47,6 +48,9 @@ app_ui <- function(request) {
           ),
           tabItem(tabName = "polyps",
                   mod_polyps_ui("polyps_ui_1")
+          ),
+          tabItem(tabName = "endoscopist",
+                  mod_per_endoscopist_ui("per_endoscopist_ui_1")
           )
         )
       )
