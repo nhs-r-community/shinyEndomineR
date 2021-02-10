@@ -85,8 +85,9 @@ mod_polyps_server <- function(id, merge_data, map_terms){
       
       key <- map_terms()$Map_EndoscopistIn
       
-      p <- ggplot2::ggplot(MyPolypTable, ggplot2::aes_string(x = key, 
-                                                             y = "percentage", fill = "DocumentedElement")) + 
+      p <- ggplot2::ggplot(MyPolypTable, 
+                           ggplot2::aes_string(x = key, y = "percentage", 
+                                               fill = "DocumentedElement")) + 
         ggplot2::geom_bar(stat = "identity") + 
         ggplot2::theme(axis.text.x = ggplot2::element_text(angle = -90))
       
@@ -148,8 +149,7 @@ mod_polyps_server <- function(id, merge_data, map_terms){
                map_terms()$Map_MicroscopicTextIn, 
                dplyr::contains("url"))
     })
-    
-    
+
     output$drilldown <- DT::renderDT({
       
       DT::datatable(
