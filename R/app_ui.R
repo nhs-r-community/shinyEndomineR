@@ -20,7 +20,8 @@ app_ui <- function(request) {
           menuItem("Map terms", tabName = "mapTerms", icon = icon("map")),
           menuItem("Barrett's", tabName = "barretts", icon = icon("chart-bar")),
           menuItem("Polyps", tabName = "polyps", icon = icon("chart-bar")),
-          menuItem("Per endoscopist", tabName = "endoscopist", icon = icon("users"))
+          menuItem("Per endoscopist", tabName = "endoscopist", icon = icon("users")),
+          menuItem("Custom", tabName = "custom", icon = icon("question-circle"))
         )
       ),
       dashboardBody(
@@ -51,6 +52,9 @@ app_ui <- function(request) {
           ),
           tabItem(tabName = "endoscopist",
                   mod_per_endoscopist_ui("per_endoscopist_ui_1")
+          ),
+          tabItem(tabName = "custom",
+                  mod_custom_ui("custom_ui_1")
           )
         )
       )
