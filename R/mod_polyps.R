@@ -38,11 +38,15 @@ mod_polyps_server <- function(id, merge_data, map_terms){
         dataset[, map_terms()$Map_EndoscopistIn])
       
       #Polyp Processing:
-      ForGRS <- dataset[grepl("colonoscopy", dataset[, map_terms()$Map_ProcedurePerformedIn]), ]
+      ForGRS <- dataset[grepl("colonoscopy", 
+                              dataset[, map_terms()$Map_ProcedurePerformedIn]), ]
       
-      #Need to get rid of duplicate entries because of reporting colons and OGDs on the same report:
+      #Need to get rid of duplicate entries because of reporting colons and OGDs
+      # on the same report:
+      
       if("Select" %in% colnames(ForGRS)){
-        #Get rid of the Select and Actions columns which create a unique row unnecessarily:
+        # Get rid of the Select and Actions columns which create a unique row unnecessarily:
+        
         ForGRS <- ForGRS %>%
           select(-Select,-Actions)
         
@@ -57,7 +61,8 @@ mod_polyps_server <- function(id, merge_data, map_terms){
         ForGRS <- unique(ForGRS)
       }
       
-      ForGRS <- EndoMineR::GRS_Type_Assess_By_Unit(ForGRS, map_terms()$Map_ProcedurePerformedIn,
+      ForGRS <- EndoMineR::GRS_Type_Assess_By_Unit(ForGRS, 
+                                                   map_terms()$Map_ProcedurePerformedIn,
                                                    map_terms()$Map_EndoscopistIn,
                                                    map_terms()$Map_MacroscopicTextIn,
                                                    map_terms()$Map_MicroscopicTextIn)

@@ -32,10 +32,11 @@ mod_barretts_server <- function(id, merge_data, map_terms){
     
     barretts_data <- reactive({
       
-      barretts_data <- merge_data()[Reduce(`|`, 
-                                           lapply(merge_data(), 
-                                                  grepl, 
-                                                  pattern = "columnar.*?lined.*?\\.|barrett")), ]
+      barretts_data <- 
+        merge_data()[Reduce(`|`, 
+                            lapply(merge_data(), 
+                                   grepl, 
+                                   pattern = "columnar.*?lined.*?\\.|barrett")), ]
       
       barretts_data <- EndoMineR::Barretts_PragueScore(barretts_data, 
                                                        map_terms()$Map_FindingsIn, 
@@ -44,8 +45,9 @@ mod_barretts_server <- function(id, merge_data, map_terms){
       barretts_data$mytext <- NULL
       barretts_data$MStage <- as.numeric(barretts_data$MStage)
       barretts_data$CStage <- as.numeric(barretts_data$CStage)
-      barretts_data$IMorNoIM <- EndoMineR::Barretts_PathStage(barretts_data, 
-                                                              map_terms()$Map_MicroscopicTextIn)
+      barretts_data$IMorNoIM <- 
+        EndoMineR::Barretts_PathStage(barretts_data, 
+                                      map_terms()$Map_MicroscopicTextIn)
       # note that the strings in the following line are not names of the merged dataset, 
       # they are fixed
       
