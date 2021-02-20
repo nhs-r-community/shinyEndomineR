@@ -6,10 +6,21 @@
 #'
 #' @noRd 
 #'
+#' @import esquisse
 #' @importFrom shiny NS tagList 
 mod_custom_ui <- function(id){
   ns <- NS(id)
   tagList(
+    
+    verbatimTextOutput("module_out"),
+    
+    esquisserUI(
+      id = ns("esquisse"), 
+      header = FALSE, # dont display gadget title
+      choose_data = FALSE # dont display button to change data
+    ),
+
+    rpivotTable::rpivotTableOutput(ns("OverallPivot")),
     
     DT::dataTableOutput(ns("CustomTable"))
   )
@@ -21,6 +32,24 @@ mod_custom_ui <- function(id){
 mod_custom_server <- function(id, merge_data, map_terms){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
+    
+    data_r <- reactiveValues(data = data.frame(), name = "custom")
+    
+    observe({
+      
+      req(merge_data())
+
+      data_r$data <- merge_data()
+    })
+    
+    custom_trim <- reactive({
+      
+      req(input$CustomTable_columns_selected)
+
+      merge_data() %>%
+        dplyr::slice(input$CustomTable_rows_all) %>%
+        dplyr::select(input$CustomTable_columns_selected)
+    })
     
     output$CustomTable = DT::renderDT({
       
@@ -35,8 +64,24 @@ mod_custom_server <- function(id, merge_data, map_terms){
                       pageLength = 200,
                       select = "api",
                       dom = 'Bfrtip',
-                      buttons = c('copy', 'csv', 'excel', 'pdf', 'print','colvis'))
+                      buttons = c('copy', 'csv', 'excel', 'pdf', 
+                                  'print','colvis'))
       )
-    }, server = FALSE)
+    }, server = TRUE)
+    
+    result <- callModule(
+      module = esquisserServer,
+      id = "esquisse",
+      data = data_r
+    )
+    
+    output$OverallPivot <- rpivotTable::renderRpivotTable({
+      
+      rpivotTable::rpivotTable(custom_trim())
+    })
+    
+    output$module_out <- renderPrint({
+      str(reactiveValuesToList(result))
+    })
   })
 }

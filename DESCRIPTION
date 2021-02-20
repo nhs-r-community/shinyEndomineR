@@ -20,7 +20,9 @@ Imports:
     shinydashboard,
     EndoMineR (>= 2.0.1.9000),
     data.table,
-    ggTimeSeries
+    ggTimeSeries,
+    esquisse,
+    rpivotTable
 Remotes: 
     sebastiz/EndoMineR
 Encoding: UTF-8

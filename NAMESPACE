@@ -2,6 +2,7 @@
 
 export("%>%")
 export(run_app)
+import(esquisse)
 import(shiny)
 import(shinydashboard)
 importFrom(config,get)

@@ -11,15 +11,18 @@ mod_barretts_ui <- function(id){
   ns <- NS(id)
   tagList(
     
-    # DT::DTOutput(ns("test")),
+    fluidRow(
+      column(6, 
+             plotly::plotlyOutput(ns("plotBarrQM"))),
+      column(6, plotly::plotlyOutput(ns("plotBarrEQ")))
+    ),
     
-    plotly::plotlyOutput(ns("plotBarrQM")),
-    
-    plotly::plotlyOutput(ns("plotBarrEQ")),
-    
-    plotly::plotlyOutput(ns("endoscopyUse_EndoscopyUseBarr")),
-    
-    plotly::plotlyOutput(ns("plotBarrTSA"))
+    fluidRow(
+      column(6, 
+             plotly::plotlyOutput(ns("endoscopyUse_EndoscopyUseBarr"))),
+      column(6, plotly::plotlyOutput(ns("plotBarrTSA"))
+      )
+    )
   )
 }
 
