@@ -102,8 +102,6 @@ mod_clean_and_merge_server <- function(id, header_filename){
       )
     })
     
-    # endoData <- endoData %>% debounce(6000)
-    
     # handle saving the headers
     
     output$saveHeaders <- downloadHandler(

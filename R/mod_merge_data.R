@@ -21,7 +21,7 @@ mod_merge_data_ui <- function(id){
 #' merge_data Server Functions
 #'
 #' @noRd 
-mod_merge_data_server <- function(id, endo_data, path_data){
+mod_merge_data_server <- function(id, endo_data, path_data, load_prev){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
@@ -47,12 +47,17 @@ mod_merge_data_server <- function(id, endo_data, path_data){
     
     return_merge <- reactive({
       
+      if(!is.null(load_prev())){
+        
+        return(load_prev())
+      }
+      
       the_data <- EndoMineR::Endomerge2(endo_data(),
-                                   input$endoDate,
-                                   input$endoNumber,
-                                   path_data(),
-                                   input$pathDate,
-                                   input$pathNumber)
+                                        input$endoDate,
+                                        input$endoNumber,
+                                        path_data(),
+                                        input$pathDate,
+                                        input$pathNumber)
       
       if(!("Date" %in% colnames(the_data))){
         colnames(the_data)[colnames(the_data) == input$endoDate] <- "Date"
@@ -68,7 +73,7 @@ mod_merge_data_server <- function(id, endo_data, path_data){
       }
       
       #Remove duplicates here
-      the_data <-  the_data[!duplicated(the_data), ]
+      the_data <- the_data[!duplicated(the_data), ]
       
       return(the_data)
     })

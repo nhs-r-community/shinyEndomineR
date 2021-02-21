@@ -21,7 +21,9 @@ app_ui <- function(request) {
           menuItem("Barrett's", tabName = "barretts", icon = icon("chart-bar")),
           menuItem("Polyps", tabName = "polyps", icon = icon("chart-bar")),
           menuItem("Per endoscopist", tabName = "endoscopist", icon = icon("users")),
-          menuItem("Custom", tabName = "custom", icon = icon("question-circle"))
+          menuItem("Custom", tabName = "custom", icon = icon("question-circle")),
+          downloadButton("downloadData", "Download data"),
+          fileInput("loadData", "Load data from a previous run")
         )
       ),
       dashboardBody(
