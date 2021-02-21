@@ -12,10 +12,12 @@ mod_custom_ui <- function(id){
   ns <- NS(id)
   tagList(
     
-    verbatimTextOutput("module_out"),
+    actionButton(ns("drawEsquisse"), "Esquisse"),
+    
+    # verbatimTextOutput(ns("module_out")),
     
     esquisserUI(
-      id = ns("esquisse"), 
+      id = ns("esquisseCustom"), 
       header = FALSE, # dont display gadget title
       choose_data = FALSE # dont display button to change data
     ),
@@ -35,11 +37,14 @@ mod_custom_server <- function(id, merge_data, map_terms){
     
     data_r <- reactiveValues(data = data.frame(), name = "custom")
     
-    observe({
+    observeEvent(input$drawEsquisse, {
       
-      req(merge_data())
+      req(map_terms()$Map_HospitalNumberIn)
+      
+      cat(str(merge_data()))
 
-      data_r$data <- merge_data()
+      data_r$data <- merge_data() %>% 
+        dplyr::select(-DayDiff)
     })
     
     custom_trim <- reactive({
@@ -71,7 +76,7 @@ mod_custom_server <- function(id, merge_data, map_terms){
     
     result <- callModule(
       module = esquisserServer,
-      id = "esquisse",
+      id = "esquisseCustom",
       data = data_r
     )
     
@@ -80,8 +85,8 @@ mod_custom_server <- function(id, merge_data, map_terms){
       rpivotTable::rpivotTable(custom_trim())
     })
     
-    output$module_out <- renderPrint({
-      str(reactiveValuesToList(result))
-    })
+    # output$module_out <- renderPrint({
+    #   str(reactiveValuesToList(result))
+    # })
   })
 }
