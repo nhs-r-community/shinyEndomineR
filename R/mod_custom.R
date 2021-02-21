@@ -12,10 +12,6 @@ mod_custom_ui <- function(id){
   ns <- NS(id)
   tagList(
     
-    actionButton(ns("drawEsquisse"), "Esquisse"),
-    
-    # verbatimTextOutput(ns("module_out")),
-    
     esquisserUI(
       id = ns("esquisseCustom"), 
       header = FALSE, # dont display gadget title
@@ -37,12 +33,10 @@ mod_custom_server <- function(id, merge_data, map_terms){
     
     data_r <- reactiveValues(data = data.frame(), name = "custom")
     
-    observeEvent(input$drawEsquisse, {
+    observe({
       
       req(map_terms()$Map_HospitalNumberIn)
       
-      cat(str(merge_data()))
-
       data_r$data <- merge_data() %>% 
         dplyr::select(-DayDiff)
     })
@@ -84,9 +78,5 @@ mod_custom_server <- function(id, merge_data, map_terms){
       
       rpivotTable::rpivotTable(custom_trim())
     })
-    
-    # output$module_out <- renderPrint({
-    #   str(reactiveValuesToList(result))
-    # })
   })
 }
