@@ -15,11 +15,12 @@
 
 ## Dependencies ----
 ## Add one line by package you want to add as dependency
-usethis::use_package("shinydashboard")
+usethis::use_package("ggTimeSeries")
 usethis::use_package("data.table")
 usethis::use_package("ggTimeSeries")
 usethis::use_package("esquisse")
 usethis::use_package("rpivotTable")
+usethis::use_package("data.table")
 usethis::use_dev_package("EndoMineR", remote = "sebastiz/EndoMineR")
 
 ## Add modules ----

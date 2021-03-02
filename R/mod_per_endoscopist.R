@@ -140,7 +140,7 @@ mod_per_endoscopist_server <- function(id, merge_data, map_terms){
       cat(str(biopsies))
       
       IndicBiopsy <- ggplot2::ggplot(biopsies, 
-                                     ggplot2::aes(x = Indications, y = endoscopist_Mean))+
+                                     ggplot2::aes(x = Indications, y = endoscopist_Mean)) +
         ggplot2::geom_bar(stat = "identity")+
         ggplot2::coord_flip()
       

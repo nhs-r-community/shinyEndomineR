@@ -17,10 +17,17 @@ mod_barretts_ui <- function(id){
       column(6, plotly::plotlyOutput(ns("plotBarrEQ")))
     ),
     
+    hr(),
+    
     fluidRow(
       column(6, 
              plotly::plotlyOutput(ns("endoscopyUse_EndoscopyUseBarr"))),
       column(6, plotly::plotlyOutput(ns("plotBarrTSA"))
+      )
+    ),
+    fluidRow(
+      column(6, 
+             ### fill in later
       )
     )
   )
@@ -107,17 +114,69 @@ mod_barretts_server <- function(id, merge_data, map_terms){
       key <- map_terms()$Map_EndoscopistIn
       
       p <- ggplot2::ggplot(FinalTable, 
-                           ggplot2::aes_string(x = key, y = "PercentDocs", fill = "DocumentedElement")) + 
-        ggplot2::geom_bar(stat = "identity") + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = -90))
+                           ggplot2::aes_string(x = key, y = "PercentDocs", 
+                                               fill = "DocumentedElement")) + 
+        ggplot2::geom_bar(stat = "identity") + 
+        ggplot2::theme(axis.text.x = ggplot2::element_text(angle = -90))
       
       plotly::ggplotly(p, source = "subset", key = key) %>% 
         plotly::layout(dragmode = "select")
     })
     
-    output$test <- DT::renderDT({
+    output$endoscopyUse_EndoscopyUseBarr <- plotly::renderPlotly({
       
-      merge_data()
+      # Create the grouped table here of the number of endoscopies done by day
+      # Then perform as per below
+      
+      dtData <- barretts_data() %>% 
+        dplyr::group_by(!!rlang::sym(map_terms()$Map_EndoscopyDateIn)) %>% 
+        dplyr::summarise(n = dplyr::n())
+
+      # Get rid of NA's as they mess things up.
+      dtData <- na.omit(data.table::as.data.table(dtData))
+      
+      p1 = ggTimeSeries::ggplot_calendar_heatmap(
+        dtData,
+        map_terms()$Map_EndoscopyDateIn,
+        'n'
+      )
+      
+      # adding some formatting
+      p1 + 
+        ggplot2::xlab('') + 
+        ggplot2::ylab('') + 
+        ggplot2::scale_fill_continuous(low = 'green', high = 'red') + 
+        ggplot2::facet_wrap(~ Year, ncol = 1)
     })
     
+    output$plotBarrTSA <- plotly::renderPlotly({
+      
+      cat(str(map_terms()$Map_EndoscopyDateIn))
+      
+      Endo_ResultPerformeda <- rlang::sym(map_terms()$Map_EndoscopyDateIn)
+      
+      TestNumbers <- barretts_data() %>% 
+        dplyr::group_by(!!rlang::sym(map_terms()$Map_EventsIn)) %>% 
+        dplyr::arrange(as.Date(!!Endo_ResultPerformeda)) %>% 
+        dplyr::group_by(
+          week = lubridate::week(as.Date(!!Endo_ResultPerformeda)),
+          month = lubridate::month(as.Date(!!Endo_ResultPerformeda)),
+          year = lubridate::year(as.Date(!!Endo_ResultPerformeda))
+        ) %>%
+        dplyr::summarise(Number = dplyr::n())
+      
+      names(TestNumbers) <- c("week", "month", "year", "freq")
+      
+      TestNumbers$DayMonth <- paste("01_", 
+                                    TestNumbers$month, "_", 
+                                    TestNumbers$year, sep = "")
+      
+      TestNumbers$DayMonth <- lubridate::dmy(TestNumbers$DayMonth)
+      
+      ggplot2::ggplot(data = TestNumbers, ggplot2::aes(x = week, y = freq)) +
+        ggplot2::geom_point() +
+        ggplot2::geom_line() +
+        ggplot2::geom_smooth(method = "loess") 
+    })
   })
 }
