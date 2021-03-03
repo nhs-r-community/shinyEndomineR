@@ -10,14 +10,43 @@
 mod_polyps_ui <- function(id){
   ns <- NS(id)
   tagList(
-    fluidRow(
-      column(5,
-             plotly::plotlyOutput(ns("plotPolypEQ")),
-             plotly::plotlyOutput(ns("endoscopyUse_EndoscopyUsePolyp"))
+    
+    tabsetPanel(
+      tabPanel("Plots",
+               splitLayout(
+                 cellArgs = list(style = "padding: 6px"),
+                 plotly::plotlyOutput(ns("plotPolypEQ")),
+                 plotly::plotlyOutput(ns("endoscopyUse_EndoscopyUsePolyp"))
+               )
       ),
-      column(7,
-             DT::DTOutput(ns("grs_table")),
-             DT::DTOutput(ns("drilldown"))
+      tabPanel("Tables",
+               fluidRow(
+                 splitLayout(
+                   cellArgs = list(style = "padding: 6px"),
+                   DT::DTOutput(ns("grs_table")),
+                   DT::DTOutput(ns("drilldown"))
+                 )
+               ),
+               fluidRow(
+                 DT::dataTableOutput(ns("polypTable"))
+               )
+      ),
+      tabPanel("Visualise",
+               tags$div(
+                 style = "height: 700px;", # needs to be in fixed height container
+                 esquisserUI(
+                   id = ns("esquissePolyp"),
+                   header = FALSE, 
+                   choose_data = FALSE 
+                 )
+               )),
+      
+      tabPanel("Cross Tabulate", 
+               style = "overflow: visible",
+               rpivotTable::rpivotTableOutput(ns("OverallPivotPolyp"))),
+      
+      tabPanel("Theograph", 
+               plotOutput(ns("plotPolypPF"))
       )
     )
   )
@@ -26,6 +55,7 @@ mod_polyps_ui <- function(id){
 #' polyps Server Functions
 #'
 #' @noRd 
+
 mod_polyps_server <- function(id, merge_data, map_terms){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
@@ -56,11 +86,13 @@ mod_polyps_server <- function(id, merge_data, map_terms){
         ForGRS <- unique(ForGRS)
       }
       
-      ForGRS <- EndoMineR::GRS_Type_Assess_By_Unit(ForGRS, 
-                                                   map_terms()$Map_ProcedurePerformedIn,
-                                                   map_terms()$Map_EndoscopistIn,
-                                                   map_terms()$Map_MacroscopicTextIn,
-                                                   map_terms()$Map_MicroscopicTextIn)
+      ForGRS <- EndoMineR::GRS_Type_Assess_By_Unit(
+        ForGRS, 
+        map_terms()$Map_ProcedurePerformedIn,
+        map_terms()$Map_EndoscopistIn,
+        map_terms()$Map_MacroscopicTextIn,
+        map_terms()$Map_MicroscopicTextIn
+      )
       
       ForGRS
     })
@@ -144,17 +176,17 @@ mod_polyps_server <- function(id, merge_data, map_terms){
       
       df %>%
         dplyr::select(map_terms()$Map_HospitalNumberIn, 
-               map_terms()$Map_EndoscopyDateIn,
-               map_terms()$Map_FindingsIn, 
-               map_terms()$Map_MicroscopicTextIn, 
-               dplyr::contains("url"))
+                      map_terms()$Map_EndoscopyDateIn,
+                      map_terms()$Map_FindingsIn, 
+                      map_terms()$Map_MicroscopicTextIn, 
+                      dplyr::contains("url"))
     })
-
+    
     output$drilldown <- DT::renderDT({
       
       DT::datatable(
         drilldataPolyp(),
-        escape = F, 
+        escape = FALSE, 
         extensions = c("Select", "Buttons"), 
         selection = "none",
         callback = DT::JS(readLines("inst/app/www/custom_dt.js")),
@@ -172,5 +204,25 @@ mod_polyps_server <- function(id, merge_data, map_terms){
           buttons = c('copy', 'csv', 'excel', 'pdf', 'print','colvis'))
       )
     }, server = FALSE)
+    
+    output$polypTable = DT::renderDT({
+      
+      # Create a copy that can be independently edited for the polyp table
+      
+      DT::datatable(
+        reduce_polyp(),
+        escape = FALSE, 
+        extensions = c("Select","Buttons"), 
+        selection = "none",
+        callback = DT::JS(readLines("inst/app/www/custom_dt.js")),
+        options = list(
+          scrollX = TRUE,
+          scrollY = TRUE,
+          pageLength = 200,
+          select = "api",
+          dom = 'Bfrtip',
+          buttons = c('copy', 'csv', 'excel', 'pdf', 'print','colvis'))
+      )
+    })
   })
 }
