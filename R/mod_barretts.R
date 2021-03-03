@@ -27,8 +27,10 @@ mod_barretts_ui <- function(id){
     ),
     fluidRow(
       column(6, 
-             ### fill in later
-      )
+             DT::DTOutput(ns("BarrDDR_Table"))
+      ),
+      column(6, 
+             DT::DTOutput(ns("drilldownBarr")))
     )
   )
 }
@@ -131,7 +133,7 @@ mod_barretts_server <- function(id, merge_data, map_terms){
       dtData <- barretts_data() %>% 
         dplyr::group_by(!!rlang::sym(map_terms()$Map_EndoscopyDateIn)) %>% 
         dplyr::summarise(n = dplyr::n())
-
+      
       # Get rid of NA's as they mess things up.
       dtData <- na.omit(data.table::as.data.table(dtData))
       
@@ -177,6 +179,58 @@ mod_barretts_server <- function(id, merge_data, map_terms){
         ggplot2::geom_point() +
         ggplot2::geom_line() +
         ggplot2::geom_smooth(method = "loess") 
+    })
+    
+    Barr_DDR_data <- reactive({
+      
+      DDRTable <- barretts_data() %>%
+        dplyr::group_by(!!rlang::sym(map_terms()$Map_EndoscopistIn),
+                        barretts_data()$IMorNoIM) %>%
+        dplyr::summarise(n = dplyr::n())
+    })
+    
+    output$BarrDDR_Table = DT::renderDT({
+      
+      Barr_DDR_data() %>%
+        tidyr::spread(2, n)
+    },
+    
+    filter = 'top', 
+    selection = list(target = 'row'),
+    extensions = 'Buttons', 
+    options = list(
+      scrollX = TRUE,
+      scrollY = TRUE,
+      pageLength = 50,
+      dom = 'Bfrtip',
+      buttons = c('copy', 'csv', 'excel', 'pdf', 'print', 'colvis'))
+    )
+    
+    drilldataBarrd <- reactive({
+      
+      shiny::validate(
+        need(length(input$BarrDDR_Table_rows_selected) > 0, "Select rows to drill down!")
+      )
+      
+      selected_species <- Barr_DDR_data()[input$BarrDDR_Table_rows_selected, ]
+      variables <- c(t(selected_species[, 1]))
+      mycolname <- colnames(selected_species)[1]
+      df <- barretts_data()[barretts_data()[, mycolname] %in% variables, ]
+      
+      df %>%
+        dplyr::select(map_terms()$Map_HospitalNumberIn, map_terms()$Map_EndoscopyDateIn, 
+                      map_terms()$Map_FindingsIn, map_terms()$Map_MicroscopicTextIn, 
+                      CStage, MStage, IMorNoIM, FU_Type, TimeToNext, 
+                      contains("url"))
+    })
+    
+    output$drilldownBarr <- DT::renderDT({
+      
+      drilldataBarrdf <- drilldataBarrd()
+      
+      drilldataBarrdf$Actions <- sapply(1 : nrow(drilldataBarrdf), buttonHTML)
+      
+      drilldataBarrdf
     })
   })
 }
