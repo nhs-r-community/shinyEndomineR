@@ -11,26 +11,54 @@ mod_barretts_ui <- function(id){
   ns <- NS(id)
   tagList(
     
-    fluidRow(
-      column(6, 
-             plotly::plotlyOutput(ns("plotBarrQM"))),
-      column(6, plotly::plotlyOutput(ns("plotBarrEQ")))
-    ),
-    
-    hr(),
-    
-    fluidRow(
-      column(6, 
-             plotly::plotlyOutput(ns("endoscopyUse_EndoscopyUseBarr"))),
-      column(6, plotly::plotlyOutput(ns("plotBarrTSA"))
-      )
-    ),
-    fluidRow(
-      column(6, 
-             DT::DTOutput(ns("BarrDDR_Table"))
+    tabsetPanel(
+      tabPanel("Plots",
+               splitLayout(
+                 cellArgs = list(style = "padding: 6px"),
+                 plotly::plotlyOutput(ns("plotBarrQM")),
+                 plotly::plotlyOutput(ns("plotBarrEQ"))
+               )
       ),
-      column(6, 
-             DT::DTOutput(ns("drilldownBarr")))
+      tabPanel("Time series",
+               splitLayout(
+                 cellArgs = list(style = "padding: 6px"),
+                 plotly::plotlyOutput(ns("endoscopyUse_EndoscopyUseBarr")),
+                 plotly::plotlyOutput(ns("plotBarrTSA"))
+               )
+      ),
+      tabPanel("Tables",
+               fluidRow(
+                 splitLayout(
+                   cellArgs = list(style = "padding: 6px"),
+                   DT::DTOutput(ns("BarrDDR_Table")),
+                   DT::DTOutput(ns("drilldownBarr"))
+                 )
+               )
+      ),
+      tabPanel("Visualise",
+               fluidRow(
+                 tags$div(
+                   style = "height: 700px;", # needs to be in fixed height container
+                   esquisserUI(
+                     id = ns("esquisseBarr"),
+                     header = FALSE, 
+                     choose_data = FALSE 
+                   )
+                 )
+               ),
+               fluidRow(
+                 splitLayout(
+                   cellArgs = list(style = "padding: 6px"),
+                   DT::dataTableOutput(ns("BarrettsTable")),
+                   rpivotTable::rpivotTableOutput(ns("BarrPivot"))
+                 )
+               )
+      ),
+      tabPanel("Theograph",
+               uiOutput(ns("HospNumBarrTheo")),
+               uiOutput(ns("DatesBarrTheo")),
+               plotly::plotlyOutput(ns("plotBarrPT"))
+      )
     )
   )
 }
@@ -85,20 +113,24 @@ mod_barretts_server <- function(id, merge_data, map_terms){
       
       Hiatus <- merge_data() %>% 
         dplyr::group_by(!! rlang::sym(map_terms()$Map_EndoscopistIn)) %>% 
-        dplyr::summarise(Hiatus = (sum(grepl("[Hh]iatus|[Ii]sland", 
-                                             !!rlang::sym(map_terms()$Map_FindingsIn))) / dplyr::n()) * 100)
+        dplyr::summarise(Hiatus = (sum(
+          grepl("[Hh]iatus|[Ii]sland", 
+                !!rlang::sym(map_terms()$Map_FindingsIn))) / dplyr::n()) * 100)
       Island <- merge_data() %>% 
         dplyr::group_by(!! rlang::sym(map_terms()$Map_EndoscopistIn)) %>% 
-        dplyr::summarise(Island = (sum(grepl("[Ii]sland", 
-                                             !!rlang::sym(map_terms()$Map_FindingsIn))) / dplyr::n()) * 100)
+        dplyr::summarise(Island = (sum(
+          grepl("[Ii]sland", 
+                !!rlang::sym(map_terms()$Map_FindingsIn))) / dplyr::n()) * 100)
       Pinch <- merge_data() %>% 
         dplyr::group_by(!! rlang::sym(map_terms()$Map_EndoscopistIn)) %>% 
-        dplyr::summarise(Pinch = (sum(grepl("[Pp]inch", 
-                                            !!rlang::sym(map_terms()$Map_FindingsIn))) / dplyr::n()) * 100)
+        dplyr::summarise(Pinch = (sum(
+          grepl("[Pp]inch", 
+                !!rlang::sym(map_terms()$Map_FindingsIn))) / dplyr::n()) * 100)
       Lesion <- merge_data() %>% 
         dplyr::group_by(!! rlang::sym(map_terms()$Map_EndoscopistIn)) %>% 
-        dplyr::summarise(Lesion = (sum(grepl("esion|odule|lcer", 
-                                             !!rlang::sym(map_terms()$Map_FindingsIn))) / dplyr::n()) * 100)
+        dplyr::summarise(Lesion = (sum(
+          grepl("esion|odule|lcer", 
+                !!rlang::sym(map_terms()$Map_FindingsIn))) / dplyr::n()) * 100)
       
       FinalTable <- dplyr::full_join(Hiatus, Island, by = map_terms()$Map_EndoscopistIn)
       FinalTable <- dplyr::full_join(FinalTable, Pinch, by = map_terms()$Map_EndoscopistIn)
@@ -152,8 +184,6 @@ mod_barretts_server <- function(id, merge_data, map_terms){
     })
     
     output$plotBarrTSA <- plotly::renderPlotly({
-      
-      cat(str(map_terms()$Map_EndoscopyDateIn))
       
       Endo_ResultPerformeda <- rlang::sym(map_terms()$Map_EndoscopyDateIn)
       
@@ -231,6 +261,96 @@ mod_barretts_server <- function(id, merge_data, map_terms){
       drilldataBarrdf$Actions <- sapply(1 : nrow(drilldataBarrdf), buttonHTML)
       
       drilldataBarrdf
+    })
+    
+    output$BarrettsTable = DT::renderDT({
+      
+      DT::datatable(
+        barretts_data(), 
+        escape = FALSE, 
+        extensions = c("Select","Buttons"), 
+        selection = "none",
+        callback = DT::JS(readLines("inst/app/www/custom_dt.js")),
+        options = list(
+          scrollX = TRUE,
+          scrollY = TRUE,
+          pageLength = 200,
+          select = "api",
+          dom = 'Bfrtip',
+          buttons = c('copy', 'csv', 'excel', 'pdf', 'print','colvis'))
+      )
+    })
+    
+    barr_trim <- reactive({
+      
+      barretts_data()[input$BarrettsTable_rows_all, input$BarrettsTable_columns_selected]
+    })
+    
+    output$BarrPivot <- rpivotTable::renderRpivotTable({
+      
+      validate(
+        need(is.data.frame(barr_trim()), "Select two columns")
+      )
+      
+      rpivotTable::rpivotTable(barr_trim())
+    })
+    
+    data_r <- reactiveValues(data = data.frame(), name = "custom")
+    
+    observe({
+      
+      req(map_terms()$Map_HospitalNumberIn)
+      req(is.data.frame(barr_trim()))
+      
+      data_r$data <- barr_trim()
+    })
+    
+    callModule(module = esquisserServer, id = "esquisseBarr", data = data_r)
+    
+    output$HospNumBarrTheo <- renderUI({
+      selectInput("HospNumBarrTheoChooser", 
+                  label = h4("Choose the column containing the hospital numbers"),
+                  choices = colnames(barretts_data()), selected = 1
+      )
+    })
+    
+    output$DatesBarrTheo <- renderUI({
+      selectInput("DateColChooserBarrTheoChooser", 
+                  label = h4("Choose the column containing the (formatted) 
+                             dates of the endoscopies"),
+                  choices = colnames(barretts_data()), selected = 1
+      )
+    })
+    
+    output$plotBarrPT <- plotly::renderPlotly({
+      
+      # ATTN this output does not work
+      
+      # Create a column with factors for the worst grade
+      
+      df <- barretts_data()
+      
+      df$RecodedColumn <- as.integer(
+        factor(df$IMorNoIM,
+               c("No_IM","IM","LGD","HGD","T1a","IGD","SM1","SM2"), 
+               ordered = TRUE)
+      )
+      
+      # Only select patients where there is more than one endoscopy:
+      bb <- df %>% 
+        dplyr::group_by(!!rlang::sym(map_terms()$Map_HospitalNumberIn)) %>% 
+        dplyr::filter(dplyr::n() > 2)
+      
+      # Now develop the patient specific journey with faceted plot in ggplot2
+      ggplot2::ggplot(bb) +
+        ggplot2::geom_line(ggplot2::aes(map_terms()$Map_EndoscopyDateIn, RecodedColumn),
+                           shape = 11, size = 1) +
+        ggplot2::geom_point(ggplot2::aes(map_terms()$Map_EndoscopyDateIn, RecodedColumn),
+                            shape = 11, colour = "red", size = 1) +
+        ggplot2::xlab("Date") + 
+        ggplot2::ylab("Histopathological State") +
+        ggplot2::theme(axis.text.x = ggplot2::element_text(angle = -90)) + 
+        ggplot2::facet_grid(map_terms()$Map_HospitalNumberIn)
     })
   })
 }
