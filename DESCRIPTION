@@ -1,6 +1,6 @@
 Package: shinyEndomineR
 Title: Shiny Endominer
-Version: 0.0.0.9000
+Version: 0.0.0.9001
 Authors@R: person('Chris', 'Beeley', email = 'chris.beeley@gmail.com', role = c('cre', 'aut'))
 Description: Endoscopy performance needs to be measurable. EndoMineR-Shiny is the interface for the package EndoMineR. The package aims to extract information from endoscopic and associated pathology reports. The extracted information is used to automatically derive performance metrics for endoscopists, follow-up timings for patients and a number of other graphical outcomes. The interface hopes to make the whole process of automated metrics user friendly and graphical.
 License: MIT + file LICENSE
