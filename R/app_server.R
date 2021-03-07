@@ -38,14 +38,15 @@ app_server <- function( input, output, session ) {
   
   map_terms <- mod_map_terms_server("map_terms_ui_1", merge_data = merge_data)
   
-  mod_barretts_server("barretts_ui_1", merge_data = merge_data, 
+  barretts_data <- mod_barretts_server("barretts_ui_1", merge_data = merge_data, 
                       map_terms = map_terms)
   
-  mod_polyps_server("polyps_ui_1", merge_data = merge_data, 
+  polyp_data <- mod_polyps_server("polyps_ui_1", merge_data = merge_data, 
                     map_terms = map_terms)
   
   mod_per_endoscopist_server("per_endoscopist_ui_1", merge_data = merge_data, 
-                             map_terms = map_terms)
+                             map_terms = map_terms, barretts_data = barretts_data,
+                             polyp_data = polyp_data)
   
   mod_custom_server("custom_ui_1", merge_data = merge_data, 
                     map_terms = map_terms)

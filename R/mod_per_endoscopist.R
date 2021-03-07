@@ -10,16 +10,29 @@
 mod_per_endoscopist_ui <- function(id){
   ns <- NS(id)
   tagList(
-    uiOutput(ns("endoscopistUI")),
-    plotly::plotlyOutput(ns("IndicsVsBiopsies")),
-    DT::dataTableOutput(ns("performanceTable"))
+    fluidRow(
+      uiOutput(ns("endoscopistUI"))
+    ),
+    fluidRow(
+      splitLayout(
+        plotly::plotlyOutput(ns("IndicsVsBiopsies")),
+        DT::dataTableOutput(ns("performanceTable"))
+      )
+    ),
+    fluidRow(
+      splitLayout(
+        plotly::plotlyOutput(ns("GRS_perEndoscopistPlot")),
+        plotly::plotlyOutput(ns("plotBarrQM_Perform"))
+      )
+    )
   )
 }
 
 #' per_endoscopist Server Functions
 #'
 #' @noRd 
-mod_per_endoscopist_server <- function(id, merge_data, map_terms){
+mod_per_endoscopist_server <- function(id, merge_data, map_terms, barretts_data,
+                                       polyp_data){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
@@ -60,35 +73,7 @@ mod_per_endoscopist_server <- function(id, merge_data, map_terms){
         escape = F, 
         extensions = c("Select","Buttons"), 
         selection = "none",
-        callback = DT::JS(
-          "var ncols = table.columns().count();",
-          "var tbl = table.table().node();",
-          "var tblID = $(tbl).closest('.datatables').attr('id');",
-          "table.on('click', 'tbody td', function(){",
-          "  // if the column is selected, deselect it:",
-          "  if(table.column(this, {selected: true}).length){",
-          "    table.column(this).deselect();",
-          "  // otherwise, select the column unless it's among the last two columns:",
-          "  } else if([ncols-1, ncols-2].indexOf(table.column(this).index()) === -1){",
-          "    table.column(this).select();",
-          "  }",
-          "  // send selected columns to Shiny",
-          "  var indexes = table.columns({selected:true}).indexes();",
-          "  var indices = Array(indexes.length);",
-          "  for(var i = 0; i < indices.length; ++i){",
-          "    indices[i] = indexes[i];",
-          "  }",
-          "  Shiny.setInputValue(tblID + '_columns_selected', indices);",
-          " var checkboxes = document.getElementsByName('row_selected');",
-          "  var checkboxesChecked = [];",
-          " for (var i=0; i<checkboxes.length; i++) {",
-          "    if (checkboxes[i].checked) {",
-          "   checkboxesChecked.push(checkboxes[i].value);",
-          "    }",
-          "   }",
-          " Shiny.onInputChange('checked_rows',checkboxesChecked);",
-          "});"),
-        
+        callback = DT::JS(readLines("inst/app/www/custom_dt.js")),
         options = list(
           scrollX = TRUE,
           scrollY = TRUE,
@@ -113,7 +98,7 @@ mod_per_endoscopist_server <- function(id, merge_data, map_terms){
       
       # Then get average per indication for that endoscopist
       # ATTN this function returns all 0s
-
+      
       myBx_df$NumBx <- EndoMineR::HistolNumbOfBx(myBx_df[, map_terms()$Map_MacroscopicTextIn], 
                                                  "pieces")
       
@@ -137,8 +122,6 @@ mod_per_endoscopist_server <- function(id, merge_data, map_terms){
       #Now merge 
       biopsies <- merge(cd, cc, by = 1)
       
-      cat(str(biopsies))
-      
       IndicBiopsy <- ggplot2::ggplot(biopsies, 
                                      ggplot2::aes(x = Indications, y = endoscopist_Mean)) +
         ggplot2::geom_bar(stat = "identity")+
@@ -146,6 +129,52 @@ mod_per_endoscopist_server <- function(id, merge_data, map_terms){
       
       plotly::ggplotly(IndicBiopsy, source = "subset", key = key) %>% 
         plotly::layout(dragmode = "select")
+    })
+    
+    output$plotBarrQM_Perform <- plotly::renderPlotly({
+      
+      key <- map_terms()$Map_EndoscopistIn
+      
+      p <- barretts_data() %>% 
+        dplyr::filter(base::get(map_terms()$Map_EndoscopistIn) == input$EndoscopistChooserIn)
+      
+      q <- p %>%
+        ggplot2::ggplot() + 
+        ggplot2::aes_string(x = "IMorNoIM", fill = map_terms()$Map_EndoscopistIn) + 
+        ggplot2::geom_histogram(stat = "count")
+      
+      plotly::ggplotly(q, source = "subset", key = key) %>% 
+        plotly::layout(dragmode = "select")
+    })
+    
+    GRS_perEndoscopist_TablePrep <- reactive({
+      
+      cat(str(polyp_data()))
+      
+      polyp_data() %>% 
+        dplyr::filter(base::get(map_terms()$Map_EndoscopistIn) == input$EndoscopistChooserIn)
+    })
+    
+    output$GRS_perEndoscopistPlot = plotly::renderPlotly({
+      
+      # ATTN following df is empty after filtering above
+      # not sure if problem with code or data
+      
+      cat(str(GRS_perEndoscopist_TablePrep()))
+      
+      MyPolypTable <- tidyr::gather(GRS_perEndoscopist_TablePrep(),
+                                    key = "DocumentedElement",
+                                    value = "percentage",
+                                    -!!rlang::sym(map_terms()$Map_EndoscopistIn))
+      
+      key <- map_terms()$Map_EndoscopistIn
+      
+      lk <- ggplot2::ggplot(MyPolypTable, 
+                            ggplot2::aes_string(x = "DocumentedElement",  y = "percentage")) + 
+        ggplot2::geom_bar(stat = "identity", position = "dodge") + 
+        ggplot2::theme(axis.text.x = ggplot2::element_text(angle = -45))
+      
+      plotly::ggplotly(lk, source = "subset", key = key)
     })
   })
 }
