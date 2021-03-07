@@ -295,7 +295,7 @@ mod_barretts_server <- function(id, merge_data, map_terms){
       rpivotTable::rpivotTable(barr_trim())
     })
     
-    data_r <- reactiveValues(data = data.frame(), name = "custom")
+    data_r <- reactiveValues(data = data.frame(), name = "barretts")
     
     observe({
       
@@ -351,6 +351,12 @@ mod_barretts_server <- function(id, merge_data, map_terms){
         ggplot2::ylab("Histopathological State") +
         ggplot2::theme(axis.text.x = ggplot2::element_text(angle = -90)) + 
         ggplot2::facet_grid(map_terms()$Map_HospitalNumberIn)
+    })
+    
+    # return barrett's data to send to per_endoscopist mod
+    
+    reactive({
+      barretts_data()
     })
   })
 }

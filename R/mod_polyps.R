@@ -28,24 +28,28 @@ mod_polyps_ui <- function(id){
                  )
                ),
                fluidRow(
-                 DT::dataTableOutput(ns("polypTable"))
+                 
                )
       ),
       tabPanel("Visualise",
-               tags$div(
-                 style = "height: 700px;", # needs to be in fixed height container
-                 esquisserUI(
-                   id = ns("esquissePolyp"),
-                   header = FALSE, 
-                   choose_data = FALSE 
-                 )
-               )),
-      
-      tabPanel("Cross Tabulate", 
-               style = "overflow: visible",
-               rpivotTable::rpivotTableOutput(ns("OverallPivotPolyp"))),
-      
+        fluidRow(
+          tags$div(
+            style = "height: 700px;", # needs to be in fixed height container
+            esquisserUI(
+              id = ns("esquissePolyp"),
+              header = FALSE, 
+              choose_data = FALSE 
+            )
+          )),
+        fluidRow(
+          splitLayout(
+            DT::dataTableOutput(ns("polypTable")),
+            rpivotTable::rpivotTableOutput(ns("OverallPivotPolyp"))
+          )
+        )
+      ),
       tabPanel("Theograph", 
+               # ATTN no code for this?
                plotOutput(ns("plotPolypPF"))
       )
     )
@@ -111,7 +115,7 @@ mod_polyps_server <- function(id, merge_data, map_terms){
         value = "percentage",
         -!!rlang::sym(map_terms()$Map_EndoscopistIn))
       
-      #Get rid of the overall number figure (=n)
+      # Get rid of the overall number figure (=n)
       MyPolypTable <- MyPolypTable %>%
         dplyr::filter(!grepl("^n$", DocumentedElement))
       
@@ -193,7 +197,8 @@ mod_polyps_server <- function(id, merge_data, map_terms){
         options = list(
           columnDefs = list(
             list(targets = as.numeric(
-              which(names(drilldataPolyp()) == names(drilldataPolyp()[map_terms()$Map_EndoscopyDateIn]))
+              which(names(drilldataPolyp()) == 
+                      names(drilldataPolyp()[map_terms()$Map_EndoscopyDateIn]))
             ), 
             visible = TRUE)),
           fixedHeader = TRUE,
@@ -223,6 +228,40 @@ mod_polyps_server <- function(id, merge_data, map_terms){
           dom = 'Bfrtip',
           buttons = c('copy', 'csv', 'excel', 'pdf', 'print','colvis'))
       )
+    })
+    
+    polyp_trim <- reactive({
+      
+      reduce_polyp()[input$polypTable_rows_all, input$polypTable_columns_selected]
+    })
+    
+    output$OverallPivotPolyp <- rpivotTable::renderRpivotTable({
+      
+      validate(
+        need(is.data.frame(polyp_trim()), "Select two columns")
+      )
+      
+      rpivotTable::rpivotTable(polyp_trim())
+    })
+    
+    data_r <- reactiveValues(data = data.frame(), name = "polyp")
+    
+    observe({
+      
+      req(map_terms()$Map_HospitalNumberIn)
+      req(is.data.frame(polyp_trim()))
+      
+      data_r$data <- polyp_trim()
+    })
+    
+    callModule(module = esquisserServer, 
+               id = "esquissePolyp", data = data_r)
+    
+    # return polyp data for the per endoscopist view
+    
+    reactive({ 
+      
+      polyp_data()
     })
   })
 }
