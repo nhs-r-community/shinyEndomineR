@@ -17,12 +17,16 @@ mod_clean_and_merge_ui <- function(id){
         fileInput(ns("selectFile"), "Load data file"),
         fileInput(ns("loadHeaders"), "Load headers from a previous run"),
         downloadButton(ns("saveHeaders"), "Save headers"),
-        uiOutput(ns("textInputsUI"))
+        uiOutput(ns("textInputsUI")),
+        actionButton(ns("add"), "Add UI")
       ),
       
       fluidRow(
         
-        DT::dataTableOutput(ns("endotable"))
+        column(width = 12,
+               DT::dataTableOutput(ns("endotable")),
+               style = "overflow-x: scroll;"
+        )
       )
     )
   )
@@ -70,6 +74,17 @@ mod_clean_and_merge_server <- function(id, header_filename){
                 textInput(session$ns(paste0("heading_id_", x)), "Add delimiter",
                           value = possible_vars[x])
               })
+      )
+    })
+    
+    # insert new inputs
+    
+    observeEvent(input$add, {
+      insertUI(
+        selector = paste0('#', session$ns('add')),
+        where = "beforeBegin",
+        ui = textInput(session$ns(paste0("heading_id_", input$add + 100)),
+                       "Add delimiter")
       )
     })
     
