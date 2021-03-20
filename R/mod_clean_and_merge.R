@@ -105,15 +105,22 @@ mod_clean_and_merge_server <- function(id, header_filename){
       return(stringi::stri_remove_empty(trimws(mywordsOGD)))
     })
     
+    # debounce the reactive
+    
+    spreadsheet_d <- spreadsheetHeaders %>% 
+      debounce(5000)
+    
     endoData <- reactive({
       
+      req(isTruthy(spreadsheet_d()))
+
       endo_object <- withProgress(message = 'Splitting the data...
         spell checking... 
         term mapping against lexicons...
         cleaning columns...
         formatting columns...',
         
-        EndoMineR::textPrep(returnData()[, 1], spreadsheetHeaders())
+        EndoMineR::textPrep(returnData()[, 1], spreadsheet_d())
       )
     })
     
@@ -125,7 +132,7 @@ mod_clean_and_merge_server <- function(id, header_filename){
       
       content = function(file){
         
-        saveRDS(spreadsheetHeaders(), file = file)
+        saveRDS(spreadsheet_d, file = file)
       }
     )
     
