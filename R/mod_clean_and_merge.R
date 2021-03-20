@@ -17,12 +17,16 @@ mod_clean_and_merge_ui <- function(id){
         fileInput(ns("selectFile"), "Load data file"),
         fileInput(ns("loadHeaders"), "Load headers from a previous run"),
         downloadButton(ns("saveHeaders"), "Save headers"),
-        uiOutput(ns("textInputsUI"))
+        uiOutput(ns("textInputsUI")),
+        actionButton(ns("add"), "Add UI")
       ),
       
       fluidRow(
         
-        DT::dataTableOutput(ns("endotable"))
+        column(width = 12,
+               DT::dataTableOutput(ns("endotable")),
+               style = "overflow-x: scroll;"
+        )
       )
     )
   )
@@ -73,6 +77,17 @@ mod_clean_and_merge_server <- function(id, header_filename){
       )
     })
     
+    # insert new inputs
+    
+    observeEvent(input$add, {
+      insertUI(
+        selector = paste0('#', session$ns('add')),
+        where = "beforeBegin",
+        ui = textInput(session$ns(paste0("heading_id_", input$add + 100)),
+                       "Add delimiter")
+      )
+    })
+    
     # define a reactive for the headers
     
     spreadsheetHeaders <- reactive({
@@ -90,15 +105,22 @@ mod_clean_and_merge_server <- function(id, header_filename){
       return(stringi::stri_remove_empty(trimws(mywordsOGD)))
     })
     
+    # debounce the reactive
+    
+    spreadsheet_d <- spreadsheetHeaders %>% 
+      debounce(5000)
+    
     endoData <- reactive({
       
+      req(isTruthy(spreadsheet_d()))
+
       endo_object <- withProgress(message = 'Splitting the data...
         spell checking... 
         term mapping against lexicons...
         cleaning columns...
         formatting columns...',
         
-        EndoMineR::textPrep(returnData()[, 1], spreadsheetHeaders())
+        EndoMineR::textPrep(returnData()[, 1], spreadsheet_d())
       )
     })
     
@@ -110,7 +132,7 @@ mod_clean_and_merge_server <- function(id, header_filename){
       
       content = function(file){
         
-        saveRDS(spreadsheetHeaders(), file = file)
+        saveRDS(spreadsheet_d, file = file)
       }
     )
     
