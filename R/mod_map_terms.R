@@ -84,9 +84,9 @@ mod_map_terms_server <- function(id, merge_data){
                                 choices = colnames(merge_data()),
                                 selected = "macroscopicdescription"),
                  
-                 selectizeInput(session$ns("Map_MacroscopicTextDelimIn"),
-                                "Select the term that delimits the biopsies", 
-                                choices = colnames(merge_data())),
+                 textInput(session$ns("Map_MacroscopicTextDelimIn"),
+                                "Write term that delimits the biopsies",
+                           value = "pieces"),
                  
                  selectizeInput(session$ns("Map_MicroscopicTextIn"),
                                 "Select the microscopic histology description column", 
