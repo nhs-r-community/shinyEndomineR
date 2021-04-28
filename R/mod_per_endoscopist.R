@@ -149,8 +149,6 @@ mod_per_endoscopist_server <- function(id, merge_data, map_terms, barretts_data,
     
     GRS_perEndoscopist_TablePrep <- reactive({
       
-      cat(str(polyp_data()))
-      
       polyp_data() %>% 
         dplyr::filter(base::get(map_terms()$Map_EndoscopistIn) == input$EndoscopistChooserIn)
     })
