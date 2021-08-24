@@ -28,4 +28,4 @@ run_app()
 ```
 
 [Link to hosted
-version](https://involve.nottshc.nhs.uk:8443/shiny_endominer/)
+version](https://involve.nottshc.nhs.uk/rsconnect/shiny_endominer/)
