@@ -49,7 +49,7 @@ mod_merge_data_server <- function(id, endo_data, path_data, load_prev){
       
       if(!is.null(load_prev())){
         
-        return(load_prev())
+        return(load_prev()$merge_data)
       }
       
       the_data <- EndoMineR::Endomerge2(endo_data(),
