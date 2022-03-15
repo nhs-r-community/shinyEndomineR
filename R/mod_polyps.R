@@ -60,7 +60,7 @@ mod_polyps_ui <- function(id){
 #'
 #' @noRd 
 
-mod_polyps_server <- function(id, merge_data, map_terms){
+mod_polyps_server <- function(id){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     

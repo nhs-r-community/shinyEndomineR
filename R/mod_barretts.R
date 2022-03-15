@@ -66,7 +66,7 @@ mod_barretts_ui <- function(id){
 #' barretts Server Functions
 #'
 #' @noRd 
-mod_barretts_server <- function(id, merge_data, map_terms){
+mod_barretts_server <- function(id){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     

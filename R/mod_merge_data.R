@@ -52,20 +52,13 @@ mod_merge_data_server <- function(id, load_prev, r){
         return(load_prev()$merge_data)
       }
       
-      req(r$endo_data,
-          input$endoDate,
-          input$endoNumber,
-          r$path_data,
-          input$pathDate,
-          input$pathNumber,
-          input$pathNumber != "Start")
-      
-      cat(str(r$endo_data))
-      cat(str(input$endoDate))
-      cat(str(input$endoNumber))
-      cat(str(r$path_data))
-      cat(str(input$pathDate))
-      cat(str(input$pathNumber))
+      req(
+        input$endoDate,
+        all(nzchar(r$endo_data[input$endoDate])),
+        all(nzchar(r$endo_data[input$endoNumber])),
+        all(nzchar(r$path_data[input$pathDate])),
+        all(nzchar(r$path_data[input$pathNumber]))
+      )
       
       the_data <- EndoMineR::Endomerge2(r$endo_data,
                                         input$endoDate,
@@ -73,6 +66,7 @@ mod_merge_data_server <- function(id, load_prev, r){
                                         r$path_data,
                                         input$pathDate,
                                         input$pathNumber)
+      
       if(!("Date" %in% colnames(the_data))){
         colnames(the_data)[colnames(the_data) == input$endoDate] <- "Date"
       }
