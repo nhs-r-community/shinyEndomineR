@@ -27,38 +27,37 @@ mod_merge_data_server <- function(id, load_prev, r){
     
     output$varSelectors <- renderUI({
       
-      fluidRow(
-        # endo controls
-        column(6, 
-               selectInput(session$ns("endoDate"), "Endoscopy date", 
-                           choices = names(r$endo_data)),
-               selectInput(session$ns("endoNumber"), "Endoscopy hospital number",
-                           choices = names(r$endo_data))
+      tagList(
+        
+        fluidRow(
+          # endo controls
+          column(6, 
+                 selectInput(session$ns("endoDate"), "Endoscopy date", 
+                             choices = names(r$endo_data)),
+                 selectInput(session$ns("endoNumber"), "Endoscopy hospital number",
+                             choices = names(r$endo_data))
+          ),
+          # pathology controls
+          column(6,
+                 selectInput(session$ns("pathDate"), "Pathology date",
+                             choices = names(r$path_data)),
+                 selectInput(session$ns("pathNumber"), "Pathology hospital number",
+                             choices = names(r$path_data))
+          )
         ),
-        # pathology controls
-        column(6,
-               selectInput(session$ns("pathDate"), "Pathology date",
-                           choices = names(r$path_data)),
-               selectInput(session$ns("pathNumber"), "Pathology hospital number",
-                           choices = names(r$path_data))
+        fluidRow(
+          
+          column(12, actionButton(session$ns("click_merge"), "Merge data"))
         )
       )
     })
     
-    return_merge <- reactive({
+    eventReactive(input$click_merge, {
       
       if(!is.null(load_prev())){
         
-        return(load_prev()$merge_data)
+        r$merge_data <- load_prev()$merge_data
       }
-      
-      req(
-        input$endoDate,
-        all(nzchar(r$endo_data[input$endoDate])),
-        all(nzchar(r$endo_data[input$endoNumber])),
-        all(nzchar(r$path_data[input$pathDate])),
-        all(nzchar(r$path_data[input$pathNumber]))
-      )
       
       the_data <- EndoMineR::Endomerge2(r$endo_data,
                                         input$endoDate,
@@ -84,12 +83,9 @@ mod_merge_data_server <- function(id, load_prev, r){
       #Remove duplicates here
       the_data <- the_data[!duplicated(the_data), ]
       
-      return(the_data)
+      r$merge_data <- the_data
+      
     })
     
-    observe({
-      
-      r$merge_data <- return_merge()
-    })
   })
 }
