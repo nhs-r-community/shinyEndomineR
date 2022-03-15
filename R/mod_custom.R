@@ -35,7 +35,7 @@ mod_custom_server <- function(id, merge_data, map_terms){
     
     observe({
       
-      req(map_terms()$Map_HospitalNumberIn)
+      req(r$map_terms$Map_HospitalNumberIn)
       
       data_r$data <- merge_data() %>% 
         dplyr::select(-DayDiff)

@@ -27,7 +27,7 @@ app_server <- function( input, output, session ) {
     content = function(file){
       
       saveRDS(list("merge_data" = merge_data(), 
-                   "map_terms" = map_terms()), 
+                   "map_terms" = r$map_terms), 
               file = file)
     }
   )
