@@ -21,7 +21,7 @@ mod_merge_data_ui <- function(id){
 #' merge_data Server Functions
 #'
 #' @noRd 
-mod_merge_data_server <- function(id, endo_data, path_data, load_prev){
+mod_merge_data_server <- function(id, endo_data, path_data, load_prev, r){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
