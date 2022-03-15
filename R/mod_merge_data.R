@@ -21,7 +21,7 @@ mod_merge_data_ui <- function(id){
 #' merge_data Server Functions
 #'
 #' @noRd 
-mod_merge_data_server <- function(id, endo_data, path_data, load_prev, r){
+mod_merge_data_server <- function(id, load_prev, r){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
@@ -31,16 +31,16 @@ mod_merge_data_server <- function(id, endo_data, path_data, load_prev, r){
         # endo controls
         column(6, 
                selectInput(session$ns("endoDate"), "Endoscopy date", 
-                           choices = names(endo_data())),
+                           choices = names(r$endo_data)),
                selectInput(session$ns("endoNumber"), "Endoscopy hospital number",
-                           choices = names(endo_data()))
+                           choices = names(r$endo_data))
         ),
         # pathology controls
         column(6,
                selectInput(session$ns("pathDate"), "Pathology date",
-                           choices = names(path_data())),
+                           choices = names(r$path_data)),
                selectInput(session$ns("pathNumber"), "Pathology hospital number",
-                           choices = names(path_data()))
+                           choices = names(r$path_data))
         )
       )
     })
@@ -52,13 +52,27 @@ mod_merge_data_server <- function(id, endo_data, path_data, load_prev, r){
         return(load_prev()$merge_data)
       }
       
-      the_data <- EndoMineR::Endomerge2(endo_data(),
+      req(r$endo_data,
+          input$endoDate,
+          input$endoNumber,
+          r$path_data,
+          input$pathDate,
+          input$pathNumber,
+          input$pathNumber != "Start")
+      
+      cat(str(r$endo_data))
+      cat(str(input$endoDate))
+      cat(str(input$endoNumber))
+      cat(str(r$path_data))
+      cat(str(input$pathDate))
+      cat(str(input$pathNumber))
+      
+      the_data <- EndoMineR::Endomerge2(r$endo_data,
                                         input$endoDate,
                                         input$endoNumber,
-                                        path_data(),
+                                        r$path_data,
                                         input$pathDate,
                                         input$pathNumber)
-      
       if(!("Date" %in% colnames(the_data))){
         colnames(the_data)[colnames(the_data) == input$endoDate] <- "Date"
       }
@@ -72,14 +86,16 @@ mod_merge_data_server <- function(id, endo_data, path_data, load_prev, r){
         colnames(the_data)[colnames(the_data) == "eHospitalNum"] <- "HospitalNum"
       }
       
+      
       #Remove duplicates here
       the_data <- the_data[!duplicated(the_data), ]
       
       return(the_data)
     })
     
-    reactive({
-      return_merge()
+    observe({
+      
+      r$merge_data <- return_merge()
     })
   })
 }

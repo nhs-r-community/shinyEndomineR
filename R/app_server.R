@@ -34,24 +34,22 @@ app_server <- function( input, output, session ) {
   
   # List the first level callModules here
   
-  endo_data <- mod_clean_and_merge_server("clean_and_merge_ui_1", 
-                                          header_filename = "endo.rda",
-                                          r = r)
+  mod_clean_and_merge_server("clean_and_merge_ui_1", 
+                             header_filename = "endo.rda",
+                             r = r)
   
-  path_data <- mod_clean_and_merge_server("clean_and_merge_ui_2", 
-                                          header_filename = "path.rda",
-                                          r = r)
+  mod_clean_and_merge_server("clean_and_merge_ui_2", 
+                             header_filename = "path.rda",
+                             r = r)
   
-  merge_data <- mod_merge_data_server("merge_data_ui_1", endo_data = endo_data, 
-                                      path_data = path_data, 
-                                      load_prev = load_prev,
-                                      r = r)
+  mod_merge_data_server("merge_data_ui_1", 
+                        load_prev = load_prev,
+                        r = r)
   
-  map_terms <- mod_map_terms_server("map_terms_ui_1", merge_data = merge_data)
+  mod_map_terms_server("map_terms_ui_1", r = r)
   
-  barretts_data <- mod_barretts_server("barretts_ui_1", merge_data = merge_data, 
-                                       map_terms = map_terms)
-  
+  mod_barretts_server("barretts_ui_1", r = r)
+
   polyp_data <- mod_polyps_server("polyps_ui_1", merge_data = merge_data, 
                                   map_terms = map_terms)
   
