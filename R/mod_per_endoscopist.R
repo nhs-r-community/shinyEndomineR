@@ -31,7 +31,7 @@ mod_per_endoscopist_ui <- function(id){
 #' per_endoscopist Server Functions
 #'
 #' @noRd 
-mod_per_endoscopist_server <- function(id, barretts_data, polyp_data){
+mod_per_endoscopist_server <- function(id, barretts_data, polyp_data, r){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     

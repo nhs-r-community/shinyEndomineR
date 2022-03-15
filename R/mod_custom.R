@@ -27,7 +27,7 @@ mod_custom_ui <- function(id){
 #' custom Server Functions
 #'
 #' @noRd 
-mod_custom_server <- function(id, merge_data, map_terms){
+mod_custom_server <- function(id, r){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
