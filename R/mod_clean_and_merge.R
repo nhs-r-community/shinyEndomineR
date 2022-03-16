@@ -35,7 +35,7 @@ mod_clean_and_merge_ui <- function(id){
 #' clean_and_merge Server Function
 #'
 #' @noRd 
-mod_clean_and_merge_server <- function(id, header_filename){
+mod_clean_and_merge_server <- function(id, header_filename, r){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
@@ -113,14 +113,16 @@ mod_clean_and_merge_server <- function(id, header_filename){
     endoData <- reactive({
       
       req(isTruthy(spreadsheet_d()))
-
+      
       endo_object <- withProgress(message = 'Splitting the data...
         spell checking... 
         term mapping against lexicons...
         cleaning columns...
-        formatting columns...',
-        
-        EndoMineR::textPrep(returnData()[, 1], spreadsheet_d())
+        formatting columns...',{
+          
+          EndoMineR::textPrep(returnData()[, 1], spreadsheet_d())
+          
+        }
       )
     })
     
@@ -136,11 +138,21 @@ mod_clean_and_merge_server <- function(id, header_filename){
       }
     )
     
-    # return the data
-    
-    reactive(
+    observe({
+
+      # save reactive
       
-      endoData()
-    )
+      if(header_filename == "endo.rda"){
+        
+        r$endo_data <- endoData()
+        
+      }
+      
+      if(header_filename == "path.rda"){
+        
+        r$path_data <- endoData()
+      }
+      
+    })
   })
 }

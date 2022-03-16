@@ -66,28 +66,28 @@ mod_barretts_ui <- function(id){
 #' barretts Server Functions
 #'
 #' @noRd 
-mod_barretts_server <- function(id, merge_data, map_terms){
+mod_barretts_server <- function(id, r){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
     barretts_data <- reactive({
       
       barretts_data <- 
-        merge_data()[Reduce(`|`, 
-                            lapply(merge_data(), 
+        r$merge_data[Reduce(`|`, 
+                            lapply(r$merge_data, 
                                    grepl, 
                                    pattern = "columnar.*?lined.*?\\.|barrett")), ]
       
       barretts_data <- EndoMineR::Barretts_PragueScore(barretts_data, 
-                                                       map_terms()$Map_FindingsIn, 
-                                                       map_terms()$Map_Findings2In)
+                                                       r$map_terms$Map_FindingsIn, 
+                                                       r$map_terms$Map_Findings2In)
       
       barretts_data$mytext <- NULL
       barretts_data$MStage <- as.numeric(barretts_data$MStage)
       barretts_data$CStage <- as.numeric(barretts_data$CStage)
       barretts_data$IMorNoIM <- 
         EndoMineR::Barretts_PathStage(barretts_data, 
-                                      map_terms()$Map_MicroscopicTextIn)
+                                      r$map_terms$Map_MicroscopicTextIn)
       # note that the strings in the following line are not names of the merged dataset, 
       # they are fixed
       
@@ -95,8 +95,8 @@ mod_barretts_server <- function(id, merge_data, map_terms){
                                                           "CStage", "MStage", "IMorNoIM")
       
       barretts_data <- EndoMineR::SurveilTimeByRow(barretts_data, 
-                                                   map_terms()$Map_HospitalNumberIn,
-                                                   map_terms()$Map_EndoscopyDateIn)
+                                                   r$map_terms$Map_HospitalNumberIn,
+                                                   r$map_terms$Map_EndoscopyDateIn)
     })
     
     output$plotBarrQM <- plotly::renderPlotly({
@@ -111,30 +111,30 @@ mod_barretts_server <- function(id, merge_data, map_terms){
     
     output$plotBarrEQ <- plotly::renderPlotly({
       
-      Hiatus <- merge_data() %>% 
-        dplyr::group_by(!! rlang::sym(map_terms()$Map_EndoscopistIn)) %>% 
+      Hiatus <- r$merge_data %>% 
+        dplyr::group_by(!! rlang::sym(r$map_terms$Map_EndoscopistIn)) %>% 
         dplyr::summarise(Hiatus = (sum(
           grepl("[Hh]iatus|[Ii]sland", 
-                !!rlang::sym(map_terms()$Map_FindingsIn))) / dplyr::n()) * 100)
-      Island <- merge_data() %>% 
-        dplyr::group_by(!! rlang::sym(map_terms()$Map_EndoscopistIn)) %>% 
+                !!rlang::sym(r$map_terms$Map_FindingsIn))) / dplyr::n()) * 100)
+      Island <- r$merge_data %>% 
+        dplyr::group_by(!! rlang::sym(r$map_terms$Map_EndoscopistIn)) %>% 
         dplyr::summarise(Island = (sum(
           grepl("[Ii]sland", 
-                !!rlang::sym(map_terms()$Map_FindingsIn))) / dplyr::n()) * 100)
-      Pinch <- merge_data() %>% 
-        dplyr::group_by(!! rlang::sym(map_terms()$Map_EndoscopistIn)) %>% 
+                !!rlang::sym(r$map_terms$Map_FindingsIn))) / dplyr::n()) * 100)
+      Pinch <- r$merge_data %>% 
+        dplyr::group_by(!! rlang::sym(r$map_terms$Map_EndoscopistIn)) %>% 
         dplyr::summarise(Pinch = (sum(
           grepl("[Pp]inch", 
-                !!rlang::sym(map_terms()$Map_FindingsIn))) / dplyr::n()) * 100)
-      Lesion <- merge_data() %>% 
-        dplyr::group_by(!! rlang::sym(map_terms()$Map_EndoscopistIn)) %>% 
+                !!rlang::sym(r$map_terms$Map_FindingsIn))) / dplyr::n()) * 100)
+      Lesion <- r$merge_data %>% 
+        dplyr::group_by(!! rlang::sym(r$map_terms$Map_EndoscopistIn)) %>% 
         dplyr::summarise(Lesion = (sum(
           grepl("esion|odule|lcer", 
-                !!rlang::sym(map_terms()$Map_FindingsIn))) / dplyr::n()) * 100)
+                !!rlang::sym(r$map_terms$Map_FindingsIn))) / dplyr::n()) * 100)
       
-      FinalTable <- dplyr::full_join(Hiatus, Island, by = map_terms()$Map_EndoscopistIn)
-      FinalTable <- dplyr::full_join(FinalTable, Pinch, by = map_terms()$Map_EndoscopistIn)
-      FinalTable <- dplyr::full_join(FinalTable, Lesion, by = map_terms()$Map_EndoscopistIn)
+      FinalTable <- dplyr::full_join(Hiatus, Island, by = r$map_terms$Map_EndoscopistIn)
+      FinalTable <- dplyr::full_join(FinalTable, Pinch, by = r$map_terms$Map_EndoscopistIn)
+      FinalTable <- dplyr::full_join(FinalTable, Lesion, by = r$map_terms$Map_EndoscopistIn)
       
       FinalTable <- data.frame(FinalTable)
       
@@ -143,9 +143,9 @@ mod_barretts_server <- function(id, merge_data, map_terms){
       FinalTable <- tidyr::gather(FinalTable,
                                   key = "DocumentedElement",
                                   value = "PercentDocs",
-                                  -!!rlang::sym(map_terms()$Map_EndoscopistIn))
+                                  -!!rlang::sym(r$map_terms$Map_EndoscopistIn))
       
-      key <- map_terms()$Map_EndoscopistIn
+      key <- r$map_terms$Map_EndoscopistIn
       
       p <- ggplot2::ggplot(FinalTable, 
                            ggplot2::aes_string(x = key, y = "PercentDocs", 
@@ -163,7 +163,7 @@ mod_barretts_server <- function(id, merge_data, map_terms){
       # Then perform as per below
       
       dtData <- barretts_data() %>% 
-        dplyr::group_by(!!rlang::sym(map_terms()$Map_EndoscopyDateIn)) %>% 
+        dplyr::group_by(!!rlang::sym(r$map_terms$Map_EndoscopyDateIn)) %>% 
         dplyr::summarise(n = dplyr::n())
       
       # Get rid of NA's as they mess things up.
@@ -171,7 +171,7 @@ mod_barretts_server <- function(id, merge_data, map_terms){
       
       p1 = ggTimeSeries::ggplot_calendar_heatmap(
         dtData,
-        map_terms()$Map_EndoscopyDateIn,
+        r$map_terms$Map_EndoscopyDateIn,
         'n'
       )
       
@@ -185,10 +185,10 @@ mod_barretts_server <- function(id, merge_data, map_terms){
     
     output$plotBarrTSA <- plotly::renderPlotly({
       
-      Endo_ResultPerformeda <- rlang::sym(map_terms()$Map_EndoscopyDateIn)
+      Endo_ResultPerformeda <- rlang::sym(r$map_terms$Map_EndoscopyDateIn)
       
       TestNumbers <- barretts_data() %>% 
-        dplyr::group_by(!!rlang::sym(map_terms()$Map_EventsIn)) %>% 
+        dplyr::group_by(!!rlang::sym(r$map_terms$Map_EventsIn)) %>% 
         dplyr::arrange(as.Date(!!Endo_ResultPerformeda)) %>% 
         dplyr::group_by(
           week = lubridate::week(as.Date(!!Endo_ResultPerformeda)),
@@ -214,7 +214,7 @@ mod_barretts_server <- function(id, merge_data, map_terms){
     Barr_DDR_data <- reactive({
       
       DDRTable <- barretts_data() %>%
-        dplyr::group_by(!!rlang::sym(map_terms()$Map_EndoscopistIn),
+        dplyr::group_by(!!rlang::sym(r$map_terms$Map_EndoscopistIn),
                         barretts_data()$IMorNoIM) %>%
         dplyr::summarise(n = dplyr::n())
     })
@@ -248,8 +248,8 @@ mod_barretts_server <- function(id, merge_data, map_terms){
       df <- barretts_data()[barretts_data()[, mycolname] %in% variables, ]
       
       df %>%
-        dplyr::select(map_terms()$Map_HospitalNumberIn, map_terms()$Map_EndoscopyDateIn, 
-                      map_terms()$Map_FindingsIn, map_terms()$Map_MicroscopicTextIn, 
+        dplyr::select(r$map_terms$Map_HospitalNumberIn, r$map_terms$Map_EndoscopyDateIn, 
+                      r$map_terms$Map_FindingsIn, r$map_terms$Map_MicroscopicTextIn, 
                       CStage, MStage, IMorNoIM, FU_Type, TimeToNext, 
                       contains("url"))
     })
@@ -299,7 +299,7 @@ mod_barretts_server <- function(id, merge_data, map_terms){
     
     observe({
       
-      req(map_terms()$Map_HospitalNumberIn)
+      req(r$map_terms$Map_HospitalNumberIn)
       req(is.data.frame(barr_trim()))
       
       data_r$data <- barr_trim()
@@ -338,19 +338,19 @@ mod_barretts_server <- function(id, merge_data, map_terms){
       
       # Only select patients where there is more than one endoscopy:
       bb <- df %>% 
-        dplyr::group_by(!!rlang::sym(map_terms()$Map_HospitalNumberIn)) %>% 
+        dplyr::group_by(!!rlang::sym(r$map_terms$Map_HospitalNumberIn)) %>% 
         dplyr::filter(dplyr::n() > 2)
       
       # Now develop the patient specific journey with faceted plot in ggplot2
       ggplot2::ggplot(bb) +
-        ggplot2::geom_line(ggplot2::aes(map_terms()$Map_EndoscopyDateIn, RecodedColumn),
+        ggplot2::geom_line(ggplot2::aes(r$map_terms$Map_EndoscopyDateIn, RecodedColumn),
                            shape = 11, size = 1) +
-        ggplot2::geom_point(ggplot2::aes(map_terms()$Map_EndoscopyDateIn, RecodedColumn),
+        ggplot2::geom_point(ggplot2::aes(r$map_terms$Map_EndoscopyDateIn, RecodedColumn),
                             shape = 11, colour = "red", size = 1) +
         ggplot2::xlab("Date") + 
         ggplot2::ylab("Histopathological State") +
         ggplot2::theme(axis.text.x = ggplot2::element_text(angle = -90)) + 
-        ggplot2::facet_grid(map_terms()$Map_HospitalNumberIn)
+        ggplot2::facet_grid(r$map_terms$Map_HospitalNumberIn)
     })
     
     # return barrett's data to send to per_endoscopist mod
