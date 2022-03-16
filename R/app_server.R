@@ -10,13 +10,18 @@ app_server <- function( input, output, session ) {
   
   r <- reactiveValues()
   
-  load_prev <- reactive({
+  observe({
     
     if(!is.null(input$loadData)){
-      return(readRDS(input$loadData$datapath))
+      
+      list_output <- readRDS(input$loadData$datapath)
+      
+      r$merge_data <- list_output$merge_data
+      r$map_terms <- list_output$map_terms
+      
     } else {
       
-      return(NULL)
+      # nothing!
     }
   })
   
