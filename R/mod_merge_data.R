@@ -52,7 +52,9 @@ mod_merge_data_server <- function(id, load_prev, r){
       )
     })
     
-    eventReactive(input$click_merge, {
+    observeEvent(input$click_merge, {
+      
+      cat("Hello!")
       
       if(!is.null(load_prev())){
         
@@ -78,10 +80,11 @@ mod_merge_data_server <- function(id, load_prev, r){
       if(!("HospitalNum" %in% colnames(the_data))){
         colnames(the_data)[colnames(the_data) == "eHospitalNum"] <- "HospitalNum"
       }
-      
-      
+
       #Remove duplicates here
       the_data <- the_data[!duplicated(the_data), ]
+      
+      cat("Hello again!")
       
       r$merge_data <- the_data
       

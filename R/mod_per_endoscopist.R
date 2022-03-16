@@ -38,16 +38,16 @@ mod_per_endoscopist_server <- function(id, barretts_data, polyp_data, r){
     output$endoscopistUI <- renderUI({
       selectInput(session$ns("EndoscopistChooserIn"), 
                   label = h4("Choose the endscopist to show the results for"),
-                  choices = merge_data()[, r$map_terms$Map_EndoscopistIn],
+                  choices = r$merge_data[, r$map_terms$Map_EndoscopistIn],
                   selected = 1)
     })
     
     performance_data <- reactive({
       
-      perf_data <- data.frame(merge_data()[, r$map_terms$Map_HospitalNumberIn],
-                              merge_data()[, r$map_terms$Map_EndoscopistIn],
-                              merge_data()[, r$map_terms$Map_FindingsIn],
-                              merge_data()[, r$map_terms$Map_MicroscopicTextIn])
+      perf_data <- data.frame(r$merge_data[, r$map_terms$Map_HospitalNumberIn],
+                              r$merge_data[, r$map_terms$Map_EndoscopistIn],
+                              r$merge_data[, r$map_terms$Map_FindingsIn],
+                              r$merge_data[, r$map_terms$Map_MicroscopicTextIn])
       
       names(perf_data) <- c(r$map_terms$Map_HospitalNumberIn, 
                             r$map_terms$Map_EndoscopistIn,
@@ -85,7 +85,7 @@ mod_per_endoscopist_server <- function(id, barretts_data, polyp_data, r){
     
     output$IndicsVsBiopsies <- plotly::renderPlotly({
       
-      biopsy_data <- merge_data()
+      biopsy_data <- r$merge_data
       
       biopsy_data$indicationsforexamination <- 
         EndoMineR::ColumnCleanUp(biopsy_data[, r$map_terms$Map_IndicationsIn])

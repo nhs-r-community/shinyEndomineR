@@ -73,8 +73,8 @@ mod_barretts_server <- function(id, r){
     barretts_data <- reactive({
       
       barretts_data <- 
-        merge_data()[Reduce(`|`, 
-                            lapply(merge_data(), 
+        r$merge_data[Reduce(`|`, 
+                            lapply(r$merge_data, 
                                    grepl, 
                                    pattern = "columnar.*?lined.*?\\.|barrett")), ]
       
@@ -111,22 +111,22 @@ mod_barretts_server <- function(id, r){
     
     output$plotBarrEQ <- plotly::renderPlotly({
       
-      Hiatus <- merge_data() %>% 
+      Hiatus <- r$merge_data %>% 
         dplyr::group_by(!! rlang::sym(r$map_terms$Map_EndoscopistIn)) %>% 
         dplyr::summarise(Hiatus = (sum(
           grepl("[Hh]iatus|[Ii]sland", 
                 !!rlang::sym(r$map_terms$Map_FindingsIn))) / dplyr::n()) * 100)
-      Island <- merge_data() %>% 
+      Island <- r$merge_data %>% 
         dplyr::group_by(!! rlang::sym(r$map_terms$Map_EndoscopistIn)) %>% 
         dplyr::summarise(Island = (sum(
           grepl("[Ii]sland", 
                 !!rlang::sym(r$map_terms$Map_FindingsIn))) / dplyr::n()) * 100)
-      Pinch <- merge_data() %>% 
+      Pinch <- r$merge_data %>% 
         dplyr::group_by(!! rlang::sym(r$map_terms$Map_EndoscopistIn)) %>% 
         dplyr::summarise(Pinch = (sum(
           grepl("[Pp]inch", 
                 !!rlang::sym(r$map_terms$Map_FindingsIn))) / dplyr::n()) * 100)
-      Lesion <- merge_data() %>% 
+      Lesion <- r$merge_data %>% 
         dplyr::group_by(!! rlang::sym(r$map_terms$Map_EndoscopistIn)) %>% 
         dplyr::summarise(Lesion = (sum(
           grepl("esion|odule|lcer", 
