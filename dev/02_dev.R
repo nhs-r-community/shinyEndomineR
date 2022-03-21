@@ -21,6 +21,7 @@ usethis::use_package("ggTimeSeries")
 usethis::use_package("esquisse")
 usethis::use_package("rpivotTable")
 usethis::use_package("data.table")
+usethis::use_package("purrr")
 usethis::use_dev_package("EndoMineR", remote = "sebastiz/EndoMineR")
 
 ## Add modules ----

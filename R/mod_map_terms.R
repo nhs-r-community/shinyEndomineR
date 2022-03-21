@@ -11,7 +11,11 @@ mod_map_terms_ui <- function(id){
   ns <- NS(id)
   tagList(
     
-    uiOutput(ns("termMappingUI"))
+    fileInput(ns("loadHeaders"), "Load headers from a previous run"),
+    
+    uiOutput(ns("termMappingUI")),
+    
+    downloadButton(ns("saveHeaders"), "Save headers")
   )
 }
 
@@ -21,6 +25,14 @@ mod_map_terms_ui <- function(id){
 mod_map_terms_server <- function(id, r){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
+    
+    fieldsMapping <- c("Map_HospitalNumberIn", "Map_EndoscopistIn", 
+                       "Map_ProcedurePerformedIn", "Map_EndoscopyDateIn", 
+                       "Map_FindingsIn", "Map_Findings2In",
+                       "Map_EventsIn", "Map_MacroscopicTextIn", 
+                       "Map_MicroscopicTextIn", 
+                       "Map_MedicationsIn", "Map_MacroscopicTextDelimIn", 
+                       "Map_InstrumentIn", "Map_IndicationsIn")
     
     output$termMappingUI <- renderUI({
       
@@ -85,7 +97,7 @@ mod_map_terms_server <- function(id, r){
                                 selected = "macroscopicdescription"),
                  
                  textInput(session$ns("Map_MacroscopicTextDelimIn"),
-                                "Write term that delimits the biopsies",
+                           "Write term that delimits the biopsies",
                            value = "pieces"),
                  
                  selectizeInput(session$ns("Map_MicroscopicTextIn"),
@@ -97,15 +109,43 @@ mod_map_terms_server <- function(id, r){
       )
     })
     
+    # handle saving the headers
+    
+    output$saveHeaders <- downloadHandler(
+      
+      filename = "map_terms.rds",
+      
+      content = function(file){
+        
+        map_terms <- purrr::map_chr(fieldsMapping, function(x) {
+          
+          input[[x]]
+        })
+        
+        names(map_terms) <- fieldsMapping
+        
+        saveRDS(map_terms, file = file)
+      }
+    )
+    
     observe({
       
-      fieldsMapping <- c("Map_HospitalNumberIn", "Map_EndoscopistIn", 
-                         "Map_ProcedurePerformedIn", "Map_EndoscopyDateIn", 
-                         "Map_FindingsIn", "Map_Findings2In",
-                         "Map_EventsIn", "Map_MacroscopicTextIn", 
-                         "Map_MicroscopicTextIn", "ImageMerge_DelimTextPickersIn", 
-                         "Map_MedicationsIn", "Map_MacroscopicTextDelimIn", 
-                         "Map_InstrumentIn", "Map_IndicationsIn")
+      req(input$loadHeaders)
+      
+      load_mapped_terms <- readRDS(input$loadHeaders$datapath)
+      
+      purrr::walk(fieldsMapping[!fieldsMapping == "Map_MacroscopicTextDelimIn"], 
+                  function(x) {
+                    
+                    updateSelectInput(session, x, 
+                                      selected = load_mapped_terms[[x]])
+                  })
+      
+    })
+    
+    observe({
+      
+      # input mapping defined for a lot of functions above
       
       r$map_terms <- sapply(fieldsMapping, function(x) input[[x]])
     })
