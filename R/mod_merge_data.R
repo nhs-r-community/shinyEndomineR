@@ -54,9 +54,12 @@ mod_merge_data_server <- function(id, load_prev, r){
     
     observeEvent(input$click_merge, {
       
-      cat("Hello!")
+      if(!exists("load_prev")){
+        
+        cat("Hmm")
+      }
       
-      if(!is.null(load_prev())){
+      if(!exists("load_prev")){
         
         r$merge_data <- load_prev()$merge_data
       }
@@ -83,8 +86,6 @@ mod_merge_data_server <- function(id, load_prev, r){
 
       #Remove duplicates here
       the_data <- the_data[!duplicated(the_data), ]
-      
-      cat("Hello again!")
       
       r$merge_data <- the_data
       
