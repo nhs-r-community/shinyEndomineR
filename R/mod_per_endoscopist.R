@@ -98,8 +98,9 @@ mod_per_endoscopist_server <- function(id, barretts_data, polyp_data, r){
       # Then get average per indication for that endoscopist
       # ATTN this function returns all 0s
       
-      myBx_df$NumBx <- EndoMineR::HistolNumbOfBx(myBx_df[, r$map_terms$Map_MacroscopicTextIn], 
-                                                 "pieces")
+      myBx_df$NumBx <- EndoMineR::HistolNumbOfBx(
+        myBx_df[, r$map_terms$Map_MacroscopicTextIn], 
+        r$map_terms$Map_MacroscopicTextDelimIn)
       
       cc <- myBx_df %>% 
         dplyr::filter(.data[[r$map_terms$Map_EndoscopistIn]] == input$EndoscopistChooserIn) %>%
