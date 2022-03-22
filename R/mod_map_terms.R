@@ -137,7 +137,11 @@ mod_map_terms_server <- function(id, r){
       
       # input mapping defined for a lot of functions above
       
-      r$map_terms <- sapply(fieldsMapping, function(x) input[[x]])
+      map_to_df <- fieldsMapping
+      
+      names(map_to_df) <- fieldsMapping
+      
+      r$map_terms <- purrr::map_df(map_to_df, function(x) input[[x]])
     })
   })
 }
