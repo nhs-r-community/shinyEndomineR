@@ -173,6 +173,9 @@ mod_polyps_server <- function(id, r){
     })
     
     drilldataPolyp <- reactive({
+      
+      req(r$map_terms$Map_HospitalNumberIn)
+      
       shiny::validate(
         need(length(input$grs_table_rows_selected) > 0, "Select rows to drill down!")
       )

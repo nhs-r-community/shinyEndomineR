@@ -44,6 +44,8 @@ mod_per_endoscopist_server <- function(id, barretts_data, polyp_data, r){
     
     performance_data <- reactive({
       
+      req(r$map_terms$Map_HospitalNumberIn)
+      
       perf_data <- data.frame(r$merge_data[, r$map_terms$Map_HospitalNumberIn],
                               r$merge_data[, r$map_terms$Map_EndoscopistIn],
                               r$merge_data[, r$map_terms$Map_FindingsIn],
