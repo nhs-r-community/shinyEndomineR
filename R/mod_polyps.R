@@ -60,20 +60,22 @@ mod_polyps_ui <- function(id){
 #'
 #' @noRd 
 
-mod_polyps_server <- function(id, merge_data, map_terms){
+mod_polyps_server <- function(id, r){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
     polyp_data <- reactive({
       
-      dataset <- merge_data()
+      req(r$map_terms$Map_MacroscopicTextDelimIn)
       
-      dataset[, map_terms()$Map_EndoscopistIn] <- EndoMineR::EndoscEndoscopist(
-        dataset[, map_terms()$Map_EndoscopistIn])
+      dataset <- r$merge_data
+      
+      dataset[, r$map_terms$Map_EndoscopistIn] <- EndoMineR::EndoscEndoscopist(
+        dataset[, r$map_terms$Map_EndoscopistIn])
       
       #Polyp Processing:
       ForGRS <- dataset[grepl("colonoscopy", 
-                              dataset[, map_terms()$Map_ProcedurePerformedIn]), ]
+                              dataset[, r$map_terms$Map_ProcedurePerformedIn]), ]
       
       #Need to get rid of duplicate entries because of reporting colons and OGDs
       # on the same report:
@@ -92,10 +94,10 @@ mod_polyps_server <- function(id, merge_data, map_terms){
       
       ForGRS <- EndoMineR::GRS_Type_Assess_By_Unit(
         ForGRS, 
-        map_terms()$Map_ProcedurePerformedIn,
-        map_terms()$Map_EndoscopistIn,
-        map_terms()$Map_MacroscopicTextIn,
-        map_terms()$Map_MicroscopicTextIn
+        r$map_terms$Map_ProcedurePerformedIn,
+        r$map_terms$Map_EndoscopistIn,
+        r$map_terms$Map_MacroscopicTextIn,
+        r$map_terms$Map_MicroscopicTextIn
       )
       
       ForGRS
@@ -103,7 +105,9 @@ mod_polyps_server <- function(id, merge_data, map_terms){
     
     reduce_polyp <- reactive({
       
-      polypdata <- merge_data()[Reduce(`|`, lapply(merge_data(), grepl, pattern = "polyp")),]
+      req(r$map_terms$Map_MacroscopicTextDelimIn)
+      
+      polypdata <- r$merge_data[Reduce(`|`, lapply(r$merge_data, grepl, pattern = "polyp")),]
       polypdata <- polypdata[Reduce(`|`, lapply(polypdata, grepl, pattern = "colonoscopy")),]
     })
     
@@ -113,13 +117,13 @@ mod_polyps_server <- function(id, merge_data, map_terms){
         polyp_data(),
         key = "DocumentedElement",
         value = "percentage",
-        -!!rlang::sym(map_terms()$Map_EndoscopistIn))
+        -!!rlang::sym(r$map_terms$Map_EndoscopistIn))
       
       # Get rid of the overall number figure (=n)
       MyPolypTable <- MyPolypTable %>%
         dplyr::filter(!grepl("^n$", DocumentedElement))
       
-      key <- map_terms()$Map_EndoscopistIn
+      key <- r$map_terms$Map_EndoscopistIn
       
       p <- ggplot2::ggplot(MyPolypTable, 
                            ggplot2::aes_string(x = key, y = "percentage", 
@@ -147,7 +151,7 @@ mod_polyps_server <- function(id, merge_data, map_terms){
     output$endoscopyUse_EndoscopyUsePolyp <- plotly::renderPlotly({
       
       dtData <- reduce_polyp() %>% 
-        dplyr::group_by(!!rlang::sym(map_terms()$Map_EndoscopyDateIn)) %>% 
+        dplyr::group_by(!!rlang::sym(r$map_terms$Map_EndoscopyDateIn)) %>% 
         dplyr::summarise(n = dplyr::n())
       
       # Get rid of NA's as they mess things up.
@@ -156,7 +160,7 @@ mod_polyps_server <- function(id, merge_data, map_terms){
       
       p1 = ggTimeSeries::ggplot_calendar_heatmap(
         dtData,
-        map_terms()$Map_EndoscopyDateIn,
+        r$map_terms$Map_EndoscopyDateIn,
         'n'
       )
       
@@ -169,6 +173,9 @@ mod_polyps_server <- function(id, merge_data, map_terms){
     })
     
     drilldataPolyp <- reactive({
+      
+      req(r$map_terms$Map_HospitalNumberIn)
+      
       shiny::validate(
         need(length(input$grs_table_rows_selected) > 0, "Select rows to drill down!")
       )
@@ -179,10 +186,10 @@ mod_polyps_server <- function(id, merge_data, map_terms){
       df <- reduce_polyp()[reduce_polyp()[, mycolname] %in% variables, ]
       
       df %>%
-        dplyr::select(map_terms()$Map_HospitalNumberIn, 
-                      map_terms()$Map_EndoscopyDateIn,
-                      map_terms()$Map_FindingsIn, 
-                      map_terms()$Map_MicroscopicTextIn, 
+        dplyr::select(r$map_terms$Map_HospitalNumberIn, 
+                      r$map_terms$Map_EndoscopyDateIn,
+                      r$map_terms$Map_FindingsIn, 
+                      r$map_terms$Map_MicroscopicTextIn, 
                       dplyr::contains("url"))
     })
     
@@ -198,7 +205,7 @@ mod_polyps_server <- function(id, merge_data, map_terms){
           columnDefs = list(
             list(targets = as.numeric(
               which(names(drilldataPolyp()) == 
-                      names(drilldataPolyp()[map_terms()$Map_EndoscopyDateIn]))
+                      names(drilldataPolyp()[r$map_terms$Map_EndoscopyDateIn]))
             ), 
             visible = TRUE)),
           fixedHeader = TRUE,
@@ -248,7 +255,7 @@ mod_polyps_server <- function(id, merge_data, map_terms){
     
     observe({
       
-      req(map_terms()$Map_HospitalNumberIn)
+      req(r$map_terms$Map_HospitalNumberIn)
       req(is.data.frame(polyp_trim()))
       
       data_r$data <- polyp_trim()

@@ -27,7 +27,7 @@ mod_custom_ui <- function(id){
 #' custom Server Functions
 #'
 #' @noRd 
-mod_custom_server <- function(id, merge_data, map_terms){
+mod_custom_server <- function(id, r){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
@@ -35,9 +35,9 @@ mod_custom_server <- function(id, merge_data, map_terms){
     
     observe({
       
-      req(map_terms()$Map_HospitalNumberIn)
+      req(r$map_terms$Map_HospitalNumberIn)
       
-      data_r$data <- merge_data() %>% 
+      data_r$data <- r$merge_data %>% 
         dplyr::select(-DayDiff)
     })
     
@@ -45,14 +45,14 @@ mod_custom_server <- function(id, merge_data, map_terms){
       
       req(input$CustomTable_columns_selected)
 
-      merge_data() %>%
+      r$merge_data %>%
         dplyr::slice(input$CustomTable_rows_all) %>%
         dplyr::select(input$CustomTable_columns_selected)
     })
     
     output$CustomTable = DT::renderDT({
       
-      DT::datatable(merge_data(), 
+      DT::datatable(r$merge_data, 
                     escape = FALSE, 
                     extensions = c("Select","Buttons"), 
                     selection = "none", 

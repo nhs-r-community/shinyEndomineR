@@ -22,7 +22,8 @@ Imports:
     data.table,
     ggTimeSeries,
     esquisse,
-    rpivotTable
+    rpivotTable,
+    purrr
 Remotes: 
     sebastiz/EndoMineR
 Encoding: UTF-8
