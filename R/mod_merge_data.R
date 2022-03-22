@@ -56,11 +56,6 @@ mod_merge_data_server <- function(id, load_prev, r){
       
       if(!exists("load_prev")){
         
-        cat("Hmm")
-      }
-      
-      if(!exists("load_prev")){
-        
         r$merge_data <- load_prev()$merge_data
       }
       
@@ -86,6 +81,12 @@ mod_merge_data_server <- function(id, load_prev, r){
 
       #Remove duplicates here
       the_data <- the_data[!duplicated(the_data), ]
+      
+      showModal(modalDialog(
+        title = "Successful merge!",
+        "Click anywhere to dismiss this message", 
+        easyClose = TRUE
+      ))
       
       r$merge_data <- the_data
       
