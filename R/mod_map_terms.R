@@ -141,6 +141,9 @@ mod_map_terms_server <- function(id, r){
                                       selected = load_mapped_terms[[x]])
                   })
       
+      updateTextInput(session, "Map_MacroscopicTextDelimIn",
+                      load_mapped_terms[["Map_MacroscopicTextDelimIn"]])
+      
     })
     
     observe({
