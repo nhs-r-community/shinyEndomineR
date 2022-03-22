@@ -38,9 +38,7 @@ app_server <- function( input, output, session ) {
     }
   })
   
-  isolate({
-    updateTabItems(session, "tabs", "endoData")}
-    )
+  isolate({updateTabItems(session, "tabs", "endoData")})
   
   # initialise petit r
   
@@ -52,8 +50,17 @@ app_server <- function( input, output, session ) {
       
       list_output <- readRDS(input$loadData$datapath)
       
+      showModal(modalDialog(
+        title = "Data loaded",
+        "Data inputs have been disabled. To load spreadsheet data please 
+        restart the application. Click anywhere to dismiss this message", 
+        easyClose = TRUE
+      ))
+      
       r$merge_data <- list_output$merge_data
       r$map_terms <- list_output$map_terms
+      
+      updateTabItems(session, "tabs", "barretts")
       
     } else {
       
