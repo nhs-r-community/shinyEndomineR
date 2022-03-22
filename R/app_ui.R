@@ -10,18 +10,8 @@ app_ui <- function(request) {
   header <- dashboardHeader(title = "Shiny Endominer")
   
   sidebar <- dashboardSidebar(
-    sidebarMenu(
-      menuItem("Endoscopy data", tabName = "endoData", icon = icon("user-md")),
-      menuItem("Pathology data", tabName = "pathData", icon = icon("microscope")),
-      menuItem("Merge data", tabName = "mergeData", icon = icon("object-group")),
-      menuItem("Map terms", tabName = "mapTerms", icon = icon("map")),
-      menuItem("Barrett's", tabName = "barretts", icon = icon("chart-bar")),
-      menuItem("Polyps", tabName = "polyps", icon = icon("chart-bar")),
-      menuItem("Per endoscopist", tabName = "endoscopist", icon = icon("users")),
-      menuItem("Custom", tabName = "custom", icon = icon("question-circle")),
-      downloadButton("downloadData", "Download data"),
-      fileInput("loadData", "Load data from a previous run")
-    ))
+    uiOutput("interfaceUI")
+  )
   
   body <- dashboardBody(
     tabItems(
