@@ -129,7 +129,7 @@ mod_map_terms_server <- function(id, r){
                   })
       
       updateTextInput(session, "Map_MacroscopicTextDelimIn",
-                      load_mapped_terms[["Map_MacroscopicTextDelimIn"]])
+                      value = load_mapped_terms[["Map_MacroscopicTextDelimIn"]])
       
     })
     
