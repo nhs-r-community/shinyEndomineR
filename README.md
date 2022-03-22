@@ -1,14 +1,9 @@
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-
 # shinyEndomineR
-
-<!-- badges: start -->
-<!-- badges: end -->
 
 Endoscopy performance needs to be measurable. EndoMineR-Shiny is the
 interface for the [package
-EndoMineR](https://github.com/sebastiz/EndoMineR_Shiny). The package
+EndoMineR](https://github.com/ropensci/EndoMineR). The package
 aims to extract information from endoscopic and associated pathology
 reports. The extracted information is used to automatically derive
 performance metrics for endoscopists, follow-up timings for patients and
