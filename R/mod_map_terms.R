@@ -41,69 +41,56 @@ mod_map_terms_server <- function(id, r){
           column(4, 
                  selectizeInput(session$ns("Map_HospitalNumberIn"),
                                 "Select the Hospital Number column", 
-                                choices = colnames(r$merge_data),
-                                selected = "HospitalNum"),
+                                choices = colnames(r$merge_data)),
                  
                  selectizeInput(session$ns("Map_EndoscopistIn"),
                                 "Select the endoscopist column", 
-                                choices = colnames(r$merge_data),
-                                selected = "endoscopist"),
+                                choices = colnames(r$merge_data)),
                  
                  selectizeInput(session$ns("Map_MedicationsIn"),
                                 "Select the Medication column", 
-                                choices = colnames(r$merge_data),
-                                selected = "medications"),
+                                choices = colnames(r$merge_data)),
                  
                  selectizeInput(session$ns("Map_IndicationsIn"),
                                 "Select the Indications column", 
-                                choices = colnames(r$merge_data),
-                                selected = "indications"),
+                                choices = colnames(r$merge_data)),
                  
                  selectizeInput(session$ns("Map_ProcedurePerformedIn"), 
                                 "Select the procedure performed description column", 
-                                choices = colnames(r$merge_data),
-                                selected = "procedureperformed"),
+                                choices = colnames(r$merge_data)),
                  
                  selectizeInput(session$ns("Map_EndoscopyDateIn"), 
                                 "Select the procedure performed date", 
-                                choices = colnames(r$merge_data),
-                                selected = "Date"),
+                                choices = colnames(r$merge_data)),
                  
                  selectizeInput(session$ns("Map_InstrumentIn"),
                                 "Select the Instrument column", 
-                                choices = colnames(r$merge_data),
-                                selected = "instrument")
+                                choices = colnames(r$merge_data))
           ),
           column(4, 
                  selectizeInput(session$ns("Map_FindingsIn"),
                                 "Select the Endoscopic Findings Column", 
-                                choices = colnames(r$merge_data),
-                                selected = "findings"),
+                                choices = colnames(r$merge_data)),
                  
                  selectizeInput(session$ns("Map_Findings2In"),
                                 "Select the second findings column (if present)", 
-                                choices = colnames(r$merge_data),
-                                selected = "diagnosis"),
+                                choices = colnames(r$merge_data)),
                  
                  selectizeInput(session$ns("Map_EventsIn"),
                                 "Select the column which states what events occurred 
                               (eg clips/ dilatation etc.)", 
-                              choices = colnames(r$merge_data),
-                              selected = "findings"),
+                              choices = colnames(r$merge_data)),
                  
                  selectizeInput(session$ns("Map_MacroscopicTextIn"),
                                 "Select the macroscopic histology column", 
-                                choices = colnames(r$merge_data),
-                                selected = "macroscopicdescription"),
+                                choices = colnames(r$merge_data)),
                  
                  textInput(session$ns("Map_MacroscopicTextDelimIn"),
-                           "Write term that delimits the biopsies",
-                           value = "pieces"),
+                           "Write term that delimits the biopsies"),
                  
                  selectizeInput(session$ns("Map_MicroscopicTextIn"),
                                 "Select the microscopic histology description column", 
-                                choices = colnames(r$merge_data),
-                                selected = "natureofspecimen")
+                                choices = colnames(r$merge_data))
                  
           ))
       )
