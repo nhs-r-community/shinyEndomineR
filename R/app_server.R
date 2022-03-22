@@ -55,10 +55,10 @@ app_server <- function( input, output, session ) {
   
   barretts_data <- mod_barretts_server("barretts_ui_1", r = r)
 
-  # polyp_data <- mod_polyps_server("polyps_ui_1", r = r)
-  # 
-  # mod_per_endoscopist_server("per_endoscopist_ui_1", barretts_data = barretts_data,
-  #                            polyp_data = polyp_data, r = r)
-  # 
+  polyp_data <- mod_polyps_server("polyps_ui_1", r = r)
+
+  mod_per_endoscopist_server("per_endoscopist_ui_1", barretts_data = barretts_data,
+                             polyp_data = polyp_data, r = r)
+
   # mod_custom_server("custom_ui_1", r = r)
 }

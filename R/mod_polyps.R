@@ -66,6 +66,8 @@ mod_polyps_server <- function(id, r){
     
     polyp_data <- reactive({
       
+      req(r$map_terms$Map_MacroscopicTextDelimIn)
+      
       dataset <- r$merge_data
       
       dataset[, r$map_terms$Map_EndoscopistIn] <- EndoMineR::EndoscEndoscopist(
@@ -102,6 +104,8 @@ mod_polyps_server <- function(id, r){
     })
     
     reduce_polyp <- reactive({
+      
+      req(r$map_terms$Map_MacroscopicTextDelimIn)
       
       polypdata <- r$merge_data[Reduce(`|`, lapply(r$merge_data, grepl, pattern = "polyp")),]
       polypdata <- polypdata[Reduce(`|`, lapply(polypdata, grepl, pattern = "colonoscopy")),]
