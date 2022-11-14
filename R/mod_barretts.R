@@ -99,6 +99,14 @@ mod_barretts_server <- function(id, r){
       barretts_data <- EndoMineR::SurveilTimeByRow(barretts_data, 
                                                    r$map_terms$Map_HospitalNumberIn,
                                                    r$map_terms$Map_EndoscopyDateIn)
+      
+      # filter data to improve default appearance of graphs
+      
+      barretts_data |> 
+        dplyr::filter(.data[[r$map_terms$Map_EndoscopyDateIn]] >
+                        max(.data[[r$map_terms$Map_EndoscopyDateIn]], 
+                            na.rm = TRUE)
+                      - 365 * 3)
     })
     
     output$plotBarrQM <- plotly::renderPlotly({
@@ -171,12 +179,6 @@ mod_barretts_server <- function(id, r){
       # Get rid of NA's as they mess things up.
       dtData <- na.omit(data.table::as.data.table(dtData))
       
-      dtData <- dtData |> 
-        dplyr::filter(.data[[r$map_terms$Map_EndoscopyDateIn]] >
-                        max(.data[[r$map_terms$Map_EndoscopyDateIn]], 
-                            na.rm = TRUE)
-                      - 365 * 3)
-
       p1 = ggTimeSeries::ggplot_calendar_heatmap(
         dtData,
         r$map_terms$Map_EndoscopyDateIn,
@@ -220,7 +222,8 @@ mod_barretts_server <- function(id, r){
 
       TestNumbers$DayMonth <- lubridate::dmy(TestNumbers$DayMonth)
 
-      ggplot2::ggplot(data = TestNumbers, ggplot2::aes(x = week, y = freq)) +
+      ggplot2::ggplot(data = TestNumbers, 
+                      ggplot2::aes(x = DayMonth, y = freq)) +
         ggplot2::geom_point() +
         ggplot2::geom_line() +
         ggplot2::geom_smooth(method = "loess")

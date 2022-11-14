@@ -156,9 +156,7 @@ mod_polyps_server <- function(id, r){
       
       # Get rid of NA's as they mess things up.
       
-      dtData <- na.omit(data.table::as.data.table(dtData))
-      
-      dtData <- dtData |> 
+      dtData <- na.omit(data.table::as.data.table(dtData)) |> 
         dplyr::filter(.data[[r$map_terms$Map_EndoscopyDateIn]] >
                         max(.data[[r$map_terms$Map_EndoscopyDateIn]], 
                             na.rm = TRUE)
