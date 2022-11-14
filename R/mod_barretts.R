@@ -47,12 +47,8 @@ mod_barretts_ui <- function(id){
                  )
                ),
                fluidRow(
-                 splitLayout(
-                   cellArgs = list(style = "padding: 6px"),
-                   DT::dataTableOutput(ns("BarrettsTable")),
                    rpivotTable::rpivotTableOutput(ns("BarrPivot"))
                  )
-               )
       ),
       tabPanel("Theograph",
                uiOutput(ns("HospNumBarrTheo")),
