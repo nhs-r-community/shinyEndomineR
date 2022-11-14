@@ -22,7 +22,7 @@ mod_barretts_ui <- function(id){
       tabPanel("Time series",
                splitLayout(
                  cellArgs = list(style = "padding: 6px"),
-                 plotly::plotlyOutput(ns("endoscopyUse_EndoscopyUseBarr")),
+                 plotOutput(ns("endoscopyUse_EndoscopyUseBarr")),
                  plotly::plotlyOutput(ns("plotBarrTSA"))
                )
       ),
@@ -159,25 +159,30 @@ mod_barretts_server <- function(id, r){
         plotly::layout(dragmode = "select")
     })
 
-    output$endoscopyUse_EndoscopyUseBarr <- plotly::renderPlotly({
+    output$endoscopyUse_EndoscopyUseBarr <- renderPlot({
 
       # Create the grouped table here of the number of endoscopies done by day
       # Then perform as per below
-
+      
       dtData <- barretts_data() %>%
         dplyr::group_by(!!rlang::sym(r$map_terms$Map_EndoscopyDateIn)) %>%
         dplyr::summarise(n = dplyr::n())
 
       # Get rid of NA's as they mess things up.
       dtData <- na.omit(data.table::as.data.table(dtData))
+      
+      dtData <- dtData |> 
+        dplyr::filter(.data[[r$map_terms$Map_EndoscopyDateIn]] >
+                        max(.data[[r$map_terms$Map_EndoscopyDateIn]], 
+                            na.rm = TRUE)
+                      - 365 * 3)
 
       p1 = ggTimeSeries::ggplot_calendar_heatmap(
         dtData,
         r$map_terms$Map_EndoscopyDateIn,
         'n'
       )
-
-      # adding some formatting
+      
       p1 +
         ggplot2::xlab('') +
         ggplot2::ylab('') +
