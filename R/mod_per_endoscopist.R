@@ -20,6 +20,9 @@ mod_per_endoscopist_ui <- function(id){
       )
     ),
     fluidRow(
+      uiOutput(ns("endoscopistUI_2"))
+    ),
+    fluidRow(
       splitLayout(
         plotly::plotlyOutput(ns("GRS_perEndoscopistPlot")),
         plotly::plotlyOutput(ns("plotBarrQM_Perform"))
@@ -35,10 +38,52 @@ mod_per_endoscopist_server <- function(id, barretts_data, polyp_data, r){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
+    biopsy_data <- reactive({
+      
+      biopsy_data <- r$merge_data
+      
+      biopsy_data$indicationsforexamination <- 
+        EndoMineR::ColumnCleanUp(biopsy_data[, r$map_terms$Map_IndicationsIn])
+      
+      myBx_df <- tidyr::separate_rows(biopsy_data, r$map_terms$Map_IndicationsIn, 
+                                      sep = ",", convert = FALSE)
+      
+      myBx_df$indicationsforexamination <- gsub("^\\.", "", myBx_df$indicationsforexamination)
+      
+      # Then get average per indication for that endoscopist
+      # ATTN this function returns all 0s
+      
+      myBx_df$NumBx <- EndoMineR::HistolNumbOfBx(
+        myBx_df[[r$map_terms$Map_MacroscopicTextIn]], 
+        r$map_terms$Map_MacroscopicTextDelimIn)
+      
+      myBx_df
+      
+    })
+    
     output$endoscopistUI <- renderUI({
+      
+      endo_choices <- biopsy_data() |> 
+        dplyr::filter(!is.na(NumBx),
+                      NumBx > 0) |> 
+        dplyr::pull(!!rlang::sym(r$map_terms$Map_EndoscopistIn)) |> 
+        unique()
+      
       selectInput(session$ns("EndoscopistChooserIn"), 
                   label = h4("Choose the endscopist to show the results for"),
-                  choices = r$merge_data[, r$map_terms$Map_EndoscopistIn],
+                  choices = endo_choices,
+                  selected = 1)
+    })
+    
+    output$endoscopistUI_2 <- renderUI({
+      
+      endo_choices <- polyp_data() |> 
+        dplyr::pull(!!rlang::sym(r$map_terms$Map_EndoscopistIn)) |> 
+        unique()
+      
+      selectInput(session$ns("EndoscopistChooserIn_2"), 
+                  label = h4("Choose the endscopist to show the results for"),
+                  choices = endo_choices,
                   selected = 1)
     })
     
@@ -87,24 +132,7 @@ mod_per_endoscopist_server <- function(id, barretts_data, polyp_data, r){
     
     output$IndicsVsBiopsies <- plotly::renderPlotly({
       
-      biopsy_data <- r$merge_data
-      
-      biopsy_data$indicationsforexamination <- 
-        EndoMineR::ColumnCleanUp(biopsy_data[, r$map_terms$Map_IndicationsIn])
-      
-      myBx_df <- tidyr::separate_rows(biopsy_data, r$map_terms$Map_IndicationsIn, 
-                                      sep = ",", convert = FALSE)
-      
-      myBx_df$indicationsforexamination <- gsub("^\\.", "", myBx_df$indicationsforexamination)
-      
-      # Then get average per indication for that endoscopist
-      # ATTN this function returns all 0s
-      
-      myBx_df$NumBx <- EndoMineR::HistolNumbOfBx(
-        myBx_df[, r$map_terms$Map_MacroscopicTextIn], 
-        r$map_terms$Map_MacroscopicTextDelimIn)
-      
-      cc <- myBx_df %>% 
+      cc <- biopsy_data() %>% 
         dplyr::filter(.data[[r$map_terms$Map_EndoscopistIn]] == input$EndoscopistChooserIn) %>%
         dplyr::group_by(!!rlang::sym(r$map_terms$Map_IndicationsIn)) %>%
         dplyr::summarise(endoscopist_Mean = mean(NumBx, na.rm = TRUE))%>%
@@ -114,7 +142,7 @@ mod_per_endoscopist_server <- function(id, barretts_data, polyp_data, r){
       names(cc) <- c("Indications", "endoscopist_Mean")
       #Now need to get the average for all the endoscopists
       
-      cd <- myBx_df %>% 
+      cd <- biopsy_data() %>% 
         dplyr::group_by(!!rlang::sym(r$map_terms$Map_IndicationsIn)) %>%
         dplyr::summarise(all_Mean = mean(NumBx, na.rm = T))%>%
         dplyr::filter(all_Mean > 0, !is.na(!!rlang::sym(r$map_terms$Map_IndicationsIn)))
@@ -151,16 +179,18 @@ mod_per_endoscopist_server <- function(id, barretts_data, polyp_data, r){
     
     GRS_perEndoscopist_TablePrep <- reactive({
       
+      save_data <- polyp_data()
+      
+      save(save_data, file = "test.rda")
+      
       polyp_data() %>% 
-        dplyr::filter(base::get(r$map_terms$Map_EndoscopistIn) == input$EndoscopistChooserIn)
+        dplyr::filter(.data[[r$map_terms$Map_EndoscopistIn]] == input$EndoscopistChooserIn_2)
     })
     
     output$GRS_perEndoscopistPlot = plotly::renderPlotly({
       
       # ATTN following df is empty after filtering above
       # not sure if problem with code or data
-      
-      cat(str(GRS_perEndoscopist_TablePrep()))
       
       MyPolypTable <- tidyr::gather(GRS_perEndoscopist_TablePrep(),
                                     key = "DocumentedElement",
