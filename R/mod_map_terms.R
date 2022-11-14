@@ -11,7 +11,10 @@ mod_map_terms_ui <- function(id){
   ns <- NS(id)
   tagList(
     
-    fileInput(ns("loadHeaders"), "Load headers from a previous run"),
+    splitLayout(
+      fileInput(ns("loadHeaders"), "Load headers from a previous run"),
+      actionButton(ns("click_map"), "Map data")
+    ),
     
     uiOutput(ns("termMappingUI")),
     
@@ -135,6 +138,8 @@ mod_map_terms_server <- function(id, r){
     
     observe({
       
+      req(input$click_map)
+      
       # input mapping defined for a lot of functions above
       
       map_to_df <- fieldsMapping
@@ -142,6 +147,12 @@ mod_map_terms_server <- function(id, r){
       names(map_to_df) <- fieldsMapping
       
       r$map_terms <- purrr::map_df(map_to_df, function(x) input[[x]])
+      
+      showModal(modalDialog(
+        title = "Successful mapping!",
+        "Click anywhere to dismiss this message", 
+        easyClose = TRUE
+      ))
     })
   })
 }

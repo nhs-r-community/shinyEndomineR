@@ -73,6 +73,7 @@ mod_barretts_server <- function(id, r){
     barretts_data <- reactive({
       
       req(r$map_terms$Map_MacroscopicTextDelimIn)
+      # req(r$merge_data[[r$map_terms$Map_MacroscopicTextDelimIn]])
       
       barretts_data <- 
         r$merge_data[Reduce(`|`, 
@@ -196,14 +197,6 @@ mod_barretts_server <- function(id, r){
 
       Endo_ResultPerformeda <- rlang::sym(r$map_terms$Map_EndoscopyDateIn)
       
-      cat(str(Endo_ResultPerformeda))
-      
-      cat(str(r$map_terms$Map_EventsIn))
-      
-      save_data <- barretts_data()
-      
-      save(save_data, file = "test.rda")
-
       TestNumbers <- barretts_data() %>%
         dplyr::group_by(!!rlang::sym(r$map_terms$Map_EventsIn)) %>%
         dplyr::arrange(as.Date(!!Endo_ResultPerformeda)) %>%
@@ -255,9 +248,10 @@ mod_barretts_server <- function(id, r){
     )
 
     drilldataBarrd <- reactive({
-
+      
       shiny::validate(
-        need(length(input$BarrDDR_Table_rows_selected) > 0, "Select rows to drill down!")
+        need(length(input$BarrDDR_Table_rows_selected) > 0, 
+             "Select rows to drill down!")
       )
 
       selected_species <- Barr_DDR_data()[input$BarrDDR_Table_rows_selected, ]
@@ -266,8 +260,10 @@ mod_barretts_server <- function(id, r){
       df <- barretts_data()[barretts_data()[, mycolname] %in% variables, ]
 
       df %>%
-        dplyr::select(r$map_terms$Map_HospitalNumberIn, r$map_terms$Map_EndoscopyDateIn,
-                      r$map_terms$Map_FindingsIn, r$map_terms$Map_MicroscopicTextIn,
+        dplyr::select(r$map_terms$Map_HospitalNumberIn, 
+                      r$map_terms$Map_EndoscopyDateIn,
+                      r$map_terms$Map_FindingsIn, 
+                      r$map_terms$Map_MicroscopicTextIn,
                       CStage, MStage, IMorNoIM, FU_Type, TimeToNext,
                       contains("url"))
     })

@@ -78,12 +78,12 @@ mod_merge_data_server <- function(id, load_prev, r){
       if(!("HospitalNum" %in% colnames(the_data))){
         colnames(the_data)[colnames(the_data) == "eHospitalNum"] <- "HospitalNum"
       }
-
+      
       #Remove duplicates here
       the_data <- the_data[!duplicated(the_data), ]
       
       showModal(modalDialog(
-        title = "Successful merge!",
+        title = "Successful mapping!",
         "Click anywhere to dismiss this message", 
         easyClose = TRUE
       ))
