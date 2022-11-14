@@ -16,7 +16,7 @@ mod_polyps_ui <- function(id){
                splitLayout(
                  cellArgs = list(style = "padding: 6px"),
                  plotly::plotlyOutput(ns("plotPolypEQ")),
-                 plotly::plotlyOutput(ns("endoscopyUse_EndoscopyUsePolyp"))
+                 plotOutput(ns("endoscopyUse_EndoscopyUsePolyp"))
                )
       ),
       tabPanel("Tables",
@@ -32,21 +32,21 @@ mod_polyps_ui <- function(id){
                )
       ),
       tabPanel("Visualise",
-        fluidRow(
-          tags$div(
-            style = "height: 700px;", # needs to be in fixed height container
-            esquisserUI(
-              id = ns("esquissePolyp"),
-              header = FALSE, 
-              choose_data = FALSE 
-            )
-          )),
-        fluidRow(
-          splitLayout(
-            DT::dataTableOutput(ns("polypTable")),
-            rpivotTable::rpivotTableOutput(ns("OverallPivotPolyp"))
-          )
-        )
+               fluidRow(
+                 tags$div(
+                   style = "height: 700px;", # needs to be in fixed height container
+                   esquisserUI(
+                     id = ns("esquissePolyp"),
+                     header = FALSE, 
+                     choose_data = FALSE 
+                   )
+                 )),
+               fluidRow(
+                 splitLayout(
+                   DT::dataTableOutput(ns("polypTable")),
+                   rpivotTable::rpivotTableOutput(ns("OverallPivotPolyp"))
+                 )
+               )
       ),
       tabPanel("Theograph", 
                # ATTN no code for this?
@@ -148,7 +148,7 @@ mod_polyps_server <- function(id, r){
       buttons = c('copy', 'csv', 'excel', 'pdf', 'print','colvis'))
     )
     
-    output$endoscopyUse_EndoscopyUsePolyp <- plotly::renderPlotly({
+    output$endoscopyUse_EndoscopyUsePolyp <- renderPlot({
       
       dtData <- reduce_polyp() %>% 
         dplyr::group_by(!!rlang::sym(r$map_terms$Map_EndoscopyDateIn)) %>% 
@@ -157,6 +157,12 @@ mod_polyps_server <- function(id, r){
       # Get rid of NA's as they mess things up.
       
       dtData <- na.omit(data.table::as.data.table(dtData))
+      
+      dtData <- dtData |> 
+        dplyr::filter(.data[[r$map_terms$Map_EndoscopyDateIn]] >
+                        max(.data[[r$map_terms$Map_EndoscopyDateIn]], 
+                            na.rm = TRUE)
+                      - 365 * 3)
       
       p1 = ggTimeSeries::ggplot_calendar_heatmap(
         dtData,
