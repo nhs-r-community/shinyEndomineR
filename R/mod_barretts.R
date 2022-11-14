@@ -193,6 +193,14 @@ mod_barretts_server <- function(id, r){
     output$plotBarrTSA <- plotly::renderPlotly({
 
       Endo_ResultPerformeda <- rlang::sym(r$map_terms$Map_EndoscopyDateIn)
+      
+      cat(str(Endo_ResultPerformeda))
+      
+      cat(str(r$map_terms$Map_EventsIn))
+      
+      save_data <- barretts_data()
+      
+      save(save_data, file = "test.rda")
 
       TestNumbers <- barretts_data() %>%
         dplyr::group_by(!!rlang::sym(r$map_terms$Map_EventsIn)) %>%
