@@ -73,8 +73,7 @@ mod_barretts_server <- function(id, r){
     barretts_data <- reactive({
       
       req(r$map_terms$Map_MacroscopicTextDelimIn)
-      # req(r$merge_data[[r$map_terms$Map_MacroscopicTextDelimIn]])
-      
+
       barretts_data <- 
         r$merge_data[Reduce(`|`, 
                             lapply(r$merge_data, 
