@@ -32,21 +32,21 @@ mod_polyps_ui <- function(id){
                )
       ),
       tabPanel("Visualise",
-        fluidRow(
-          tags$div(
-            style = "height: 700px;", # needs to be in fixed height container
-            esquisserUI(
-              id = ns("esquissePolyp"),
-              header = FALSE, 
-              choose_data = FALSE 
-            )
-          )),
-        fluidRow(
-          splitLayout(
-            DT::dataTableOutput(ns("polypTable")),
-            rpivotTable::rpivotTableOutput(ns("OverallPivotPolyp"))
-          )
-        )
+               fluidRow(
+                 tags$div(
+                   style = "height: 700px;", # needs to be in fixed height container
+                   esquisserUI(
+                     id = ns("esquissePolyp"),
+                     header = FALSE, 
+                     choose_data = FALSE 
+                   )
+                 )),
+               fluidRow(
+                 splitLayout(
+                   DT::dataTableOutput(ns("polypTable")),
+                   rpivotTable::rpivotTableOutput(ns("OverallPivotPolyp"))
+                 )
+               )
       ),
       tabPanel("Theograph", 
                # ATTN no code for this?
