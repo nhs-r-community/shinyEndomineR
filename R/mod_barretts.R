@@ -163,7 +163,7 @@ mod_barretts_server <- function(id, r){
 
       # Create the grouped table here of the number of endoscopies done by day
       # Then perform as per below
-
+      
       dtData <- barretts_data() %>%
         dplyr::group_by(!!rlang::sym(r$map_terms$Map_EndoscopyDateIn)) %>%
         dplyr::summarise(n = dplyr::n())
@@ -176,13 +176,8 @@ mod_barretts_server <- function(id, r){
         r$map_terms$Map_EndoscopyDateIn,
         'n'
       )
-
-      # adding some formatting
-      p1 +
-        ggplot2::xlab('') +
-        ggplot2::ylab('') +
-        ggplot2::scale_fill_continuous(low = 'green', high = 'red') +
-        ggplot2::facet_wrap(~ Year, ncol = 1)
+      
+      p1
     })
 
     output$plotBarrTSA <- plotly::renderPlotly({
