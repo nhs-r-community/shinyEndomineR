@@ -51,9 +51,7 @@ mod_barretts_ui <- function(id){
                  )
       ),
       tabPanel("Theograph",
-               uiOutput(ns("HospNumBarrTheo")),
-               uiOutput(ns("DatesBarrTheo")),
-               plotly::plotlyOutput(ns("plotBarrPT"))
+               plotOutput(ns("plotBarrPT"))
       )
     )
   )
@@ -316,22 +314,7 @@ mod_barretts_server <- function(id, r){
 
     callModule(module = esquisserServer, id = "esquisseBarr", data = data_r)
 
-    output$HospNumBarrTheo <- renderUI({
-      selectInput("HospNumBarrTheoChooser",
-                  label = h4("Choose the column containing the hospital numbers"),
-                  choices = colnames(barretts_data()), selected = 1
-      )
-    })
-
-    output$DatesBarrTheo <- renderUI({
-      selectInput("DateColChooserBarrTheoChooser",
-                  label = h4("Choose the column containing the (formatted)
-                             dates of the endoscopies"),
-                  choices = colnames(barretts_data()), selected = 1
-      )
-    })
-
-    output$plotBarrPT <- plotly::renderPlotly({
+    output$plotBarrPT <- renderPlot({
 
       # ATTN this output does not work
 
@@ -344,11 +327,12 @@ mod_barretts_server <- function(id, r){
                c("No_IM","IM","LGD","HGD","T1a","IGD","SM1","SM2"),
                ordered = TRUE)
       )
-
+      
       # Only select patients where there is more than one endoscopy:
       bb <- df %>%
+        dplyr::filter(!is.na(RecodedColumn)) |> 
         dplyr::group_by(!!rlang::sym(r$map_terms$Map_HospitalNumberIn)) %>%
-        dplyr::filter(dplyr::n() > 2)
+        dplyr::filter(dplyr::n() > 1)
 
       # Now develop the patient specific journey with faceted plot in ggplot2
       ggplot2::ggplot(bb) +
