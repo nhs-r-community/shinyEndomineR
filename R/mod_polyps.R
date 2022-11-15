@@ -150,30 +150,9 @@ mod_polyps_server <- function(id, r){
     
     output$endoscopyUse_EndoscopyUsePolyp <- renderPlot({
       
-      dtData <- reduce_polyp() %>% 
-        dplyr::group_by(!!rlang::sym(r$map_terms$Map_EndoscopyDateIn)) %>% 
-        dplyr::summarise(n = dplyr::n())
+      reduce_polyp() %>% 
+        calendar_heatmap(r$map_terms$Map_EndoscopyDateIn)
       
-      # Get rid of NA's as they mess things up.
-      
-      dtData <- na.omit(data.table::as.data.table(dtData)) |> 
-        dplyr::filter(.data[[r$map_terms$Map_EndoscopyDateIn]] >
-                        max(.data[[r$map_terms$Map_EndoscopyDateIn]], 
-                            na.rm = TRUE)
-                      - 365 * 3)
-      
-      p1 = ggTimeSeries::ggplot_calendar_heatmap(
-        dtData,
-        r$map_terms$Map_EndoscopyDateIn,
-        'n'
-      )
-      
-      # adding some formatting
-      p1 + 
-        ggplot2::xlab('') + 
-        ggplot2::ylab('') + 
-        ggplot2::scale_fill_continuous(low = 'green', high = 'red') + 
-        ggplot2::facet_wrap(~ Year, ncol = 1)
     })
     
     drilldataPolyp <- reactive({
