@@ -14,7 +14,11 @@ calendar_heatmap <- function(data, endoscopy_date){
   
   dtData <- data |> 
     dplyr::group_by(!!rlang::sym(endoscopy_date)) %>%
-    dplyr::summarise(n = dplyr::n())
+    dplyr::summarise(n = dplyr::n()) |> 
+    dplyr::filter(.data[[endoscopy_date]] >
+                    max(.data[[endoscopy_date]], 
+                        na.rm = TRUE)
+                  - 365 * 3)
   
   # Get rid of NA's as they mess things up.
   dtData <- na.omit(data.table::as.data.table(dtData))
